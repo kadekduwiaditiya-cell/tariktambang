@@ -6,7 +6,7 @@
   <title>Tarik Tambang Matematika — Game Edukasi 2 Siswa</title>
 
   <!-- Meta Tag PWA & Kompatibilitas Mobile / Desktop Standalone -->
-  <meta name="description" content="Game edukasi tarik tambang matematika interaktif untuk 2 siswa" />
+  <meta name="description" content="Game edukasi tarik tambang matematika interaktif untuk 2 siswa bergaya Duolingo" />
   <meta name="theme-color" content="#58CC02" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,11 +24,11 @@
   <!-- Google Fonts: Nunito (Tipografi Khas Duolingo yang Bulat, Tebal, & Ramah) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
 
   <style>
     :root {
-      /* Palet Warna Resmi Bergaya Duolingo */
+      /* Palet Warna Resmi Duolingo Design System */
       --duo-green: #58CC02;
       --duo-green-dark: #58A700;
       --duo-green-light: #D7FFB8;
@@ -84,17 +84,23 @@
        ===================================================================== */
     .duo-btn {
       position: relative;
-      border-radius: 16px;
+      border-radius: 14px;
       border: 2px solid var(--btn-border, #E5E5E5);
       box-shadow: 0 4px 0 var(--btn-shadow, #E5E5E5);
       background-color: var(--btn-bg, #FFFFFF);
       color: var(--btn-color, #3C3C3C);
       touch-action: manipulation;
       cursor: pointer;
-      transition: transform 80ms cubic-bezier(0.2, 0.8, 0.2, 1),
-                  box-shadow 80ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      transition: transform 75ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                  box-shadow 75ms cubic-bezier(0.2, 0.8, 0.2, 1),
                   background-color 120ms ease,
                   border-color 120ms ease;
+    }
+
+    @media (min-width: 640px) {
+      .duo-btn {
+        border-radius: 16px;
+      }
     }
 
     .duo-btn:hover:not(:disabled) {
@@ -193,7 +199,7 @@
     }
 
     /* =====================================================================
-       ANIMASI MIKRO INTERAKTIF
+       ANIMASI MIKRO INTERAKTIF & GELOMBANG EQUALIZER MUSIK
        ===================================================================== */
     @keyframes duoPopIn {
       0% { transform: scale(0.86); opacity: 0.4; }
@@ -206,14 +212,14 @@
 
     @keyframes duoShake {
       0%, 100% { transform: translateX(0); }
-      18% { transform: translateX(-9px); }
-      36% { transform: translateX(9px); }
-      54% { transform: translateX(-6px); }
-      72% { transform: translateX(6px); }
-      90% { transform: translateX(-3px); }
+      18% { transform: translateX(-8px); }
+      36% { transform: translateX(8px); }
+      54% { transform: translateX(-5px); }
+      72% { transform: translateX(5px); }
+      90% { transform: translateX(-2px); }
     }
     .animate-duo-shake {
-      animation: duoShake 380ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+      animation: duoShake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
     }
 
     @keyframes streakPulse {
@@ -232,6 +238,17 @@
       animation: floatBob 2.6s ease-in-out infinite;
     }
 
+    @keyframes eqBarBounce {
+      0%, 100% { transform: scaleY(0.35); }
+      50% { transform: scaleY(1); }
+    }
+    .eq-bar {
+      transform-origin: bottom;
+      animation: eqBarBounce 0.65s ease-in-out infinite;
+    }
+    .eq-bar-2 { animation-delay: 0.18s; }
+    .eq-bar-3 { animation-delay: 0.34s; }
+
     #arenaCanvas, #confettiCanvas {
       display: block;
       width: 100%;
@@ -246,151 +263,176 @@
   <!-- ===================================================================== -->
   <div id="setupScreen" class="min-h-screen flex flex-col">
     
-    <!-- Top Navbar Bersih Bergaya Duolingo -->
-    <nav class="bg-white border-b-2 border-[#E5E5E5] px-4 sm:px-8 h-16 flex items-center justify-between sticky top-0 z-30">
-      <div class="flex items-center gap-3">
-        <!-- Ikon Emblem Tali & Bintang -->
-        <div class="w-10 h-10 rounded-xl bg-[#58CC02] border-b-4 border-[#58A700] flex items-center justify-center shadow-sm">
-          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Top Navbar 1 Baris Bersih & Responsif (360px HP s.d. Desktop Lebar) -->
+    <nav class="bg-white border-b-2 border-[#E5E5E5] px-2.5 sm:px-6 h-16 flex items-center justify-between gap-2 sticky top-0 z-30">
+      
+      <!-- Kiri: Ikon Logo Kartun Ringkas + Judul -->
+      <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#58CC02] border-b-[3px] border-[#58A700] flex items-center justify-center shrink-0">
+          <!-- Ikon Maskot Mini & Bendera -->
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
             <line x1="4" y1="22" x2="4" y2="15"></line>
           </svg>
         </div>
-        <div>
-          <span class="font-black text-xl sm:text-2xl tracking-tight text-[#58CC02]">duo</span><span class="font-black text-xl sm:text-2xl tracking-tight text-[#3C3C3C]">tambang</span>
-          <span class="hidden sm:inline-block ml-2 px-2.5 py-0.5 rounded-lg bg-[#DDF4FF] text-[#1899D6] font-extrabold text-xs uppercase tracking-wider">
-            Mode Kelas 2 Siswa
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="font-black text-sm sm:text-xl tracking-tight text-[#3C3C3C] whitespace-nowrap">
+            Tarik Tambang
+          </span>
+          <span class="hidden md:inline-block px-2.5 py-0.5 rounded-lg bg-[#DDF4FF] text-[#1899D6] font-extrabold text-xs uppercase tracking-wider shrink-0">
+            Matematika
           </span>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-2.5">
-        <!-- Tombol Taktil 3D Instal Aplikasi (PWA) -->
-        <button id="btnInstallApp" type="button" class="duo-btn duo-btn-blue px-3 sm:px-4 py-2 flex items-center gap-2 font-extrabold text-xs sm:text-sm">
-          <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
+      <!-- Kanan: Deretan 3 Tombol Taktil 3D Seragam (Tinggi 40px, Jarak 8px) -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        
+        <!-- 1. Tombol Toggle Musik Latar (BGM) -->
+        <button
+          id="btnToggleBgm"
+          type="button"
+          title="Musik Latar (BGM)"
+          aria-label="Musik Latar"
+          class="duo-btn duo-card-selected-blue h-10 w-10 md:w-auto md:px-3 flex items-center justify-center gap-1.5 font-extrabold text-xs shrink-0"
+        >
+          <!-- Ikon Not Balok -->
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
           </svg>
-          <span id="btnInstallAppLabel">Instal Aplikasi</span>
-          <span id="installReadyDot" class="hidden w-2.5 h-2.5 rounded-full bg-[#FFC800] ring-2 ring-white animate-pulse"></span>
+          <!-- Indikator Gelombang Suara Animasi -->
+          <span id="bgmWaveBars" class="flex items-end gap-[2px] h-3 shrink-0" aria-hidden="true">
+            <span class="w-[2.5px] h-3 bg-current rounded-full eq-bar"></span>
+            <span class="w-[2.5px] h-3 bg-current rounded-full eq-bar eq-bar-2"></span>
+            <span class="w-[2.5px] h-3 bg-current rounded-full eq-bar eq-bar-3"></span>
+          </span>
+          <span class="hidden md:inline">Musik</span>
         </button>
 
-        <!-- Tombol Kontrol Suara -->
-        <button id="btnSetupSound" type="button" class="duo-btn duo-btn-white px-3 sm:px-3.5 py-2 flex items-center gap-2 font-extrabold text-xs sm:text-sm text-[#777777]">
-          <svg id="setupSoundIconSvg" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1CB0F6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <!-- 2. Tombol Toggle Efek Suara (SFX) -->
+        <button
+          id="btnToggleSfx"
+          type="button"
+          title="Efek Suara (SFX)"
+          aria-label="Efek Suara"
+          class="duo-btn duo-btn-white h-10 w-10 lg:w-auto lg:px-3 flex items-center justify-center gap-1.5 font-extrabold text-xs text-[#1CB0F6] shrink-0"
+        >
+          <svg id="sfxIconSetup" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
           </svg>
-          <span id="setupSoundLabel" class="hidden md:inline">Suara Aktif</span>
+          <span class="hidden lg:inline text-[#3C3C3C]">Suara</span>
         </button>
+
+        <!-- 3. Tombol 'Instal App' Proporsional (HP & Laptop) -->
+        <button
+          id="btnInstallApp"
+          type="button"
+          class="duo-btn duo-btn-blue h-10 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-extrabold text-xs sm:text-sm whitespace-nowrap shrink-0"
+        >
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span id="btnInstallAppLabel">Instal App</span>
+        </button>
+
       </div>
     </nav>
 
     <!-- Konten Pengaturan Terpusat -->
-    <main class="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <main class="flex-1 w-full max-w-4xl mx-auto px-3.5 sm:px-6 py-5 sm:py-8">
       
       <!-- Judul Halaman -->
-      <div class="text-center mb-6 sm:mb-8">
+      <div class="text-center mb-5 sm:mb-7">
         <h1 class="text-2xl sm:text-4xl font-black text-[#3C3C3C] tracking-tight">
           Tarik Tambang Matematika
         </h1>
-        <p class="text-[#777777] font-bold text-sm sm:text-base mt-1">
-          Siapkan pertandingan dua siswa dan mulai adu kecepatan berhitung!
+        <p class="text-[#777777] font-bold text-xs sm:text-base mt-1">
+          Adu kecepatan berhitung 2 siswa — pilih tim, level, dan mulai pertandingan!
         </p>
       </div>
 
-      <div class="space-y-5">
+      <div class="space-y-4 sm:space-y-5">
         
         <!-- BAGIAN 1: PROFIL & NAMA KEDUA TIM MASKOT -->
         <section class="duo-surface p-4 sm:p-6">
-          <h2 class="text-xs font-black uppercase tracking-widest text-[#AFAFAF] mb-4">
+          <h2 class="text-xs font-black uppercase tracking-widest text-[#AFAFAF] mb-3.5">
             1. Peserta Pertandingan
           </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
             
-            <!-- Kartu Tim Merah (Foxy) -->
-            <div class="rounded-2xl border-2 border-[#FF9696] bg-[#FFDFE0]/45 p-3.5 sm:p-4 flex items-center gap-3.5">
-              <!-- Avatar SVG Rubah Merah -->
-              <div class="w-16 h-16 rounded-2xl bg-[#FF4B4B] border-b-4 border-[#EA2B2B] flex items-center justify-center shrink-0 overflow-hidden p-1">
+            <!-- Kartu Tim Merah (Foxy si Rubah Merah) -->
+            <div class="rounded-2xl border-2 border-[#FF9696] bg-[#FFDFE0]/45 p-3.5 flex items-center gap-3.5">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#FF4B4B] border-b-4 border-[#EA2B2B] flex items-center justify-center shrink-0 overflow-hidden p-1">
                 <svg viewBox="0 0 80 80" class="w-full h-full">
-                  <!-- Telinga Rubah -->
                   <polygon points="16,32 12,8 34,20" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5" stroke-linejoin="round"/>
                   <polygon points="64,32 68,8 46,20" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5" stroke-linejoin="round"/>
                   <polygon points="19,28 17,14 29,21" fill="#FFD1D1"/>
                   <polygon points="61,28 63,14 51,21" fill="#FFD1D1"/>
-                  <!-- Kepala -->
                   <ellipse cx="40" cy="44" rx="26" ry="22" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5"/>
-                  <!-- Pipi Putih -->
                   <path d="M15 44 C22 44, 30 50, 40 65 C24 65, 15 56, 15 44 Z" fill="#FFFFFF"/>
                   <path d="M65 44 C58 44, 50 50, 40 65 C56 65, 65 56, 65 44 Z" fill="#FFFFFF"/>
-                  <!-- Mata -->
                   <circle cx="30" cy="40" r="4.5" fill="#2B2B2B"/>
                   <circle cx="50" cy="40" r="4.5" fill="#2B2B2B"/>
                   <circle cx="31.5" cy="38.5" r="1.6" fill="#FFFFFF"/>
                   <circle cx="51.5" cy="38.5" r="1.6" fill="#FFFFFF"/>
-                  <!-- Alis Semangat -->
                   <line x1="24" y1="32" x2="34" y2="34" stroke="#7F1D1D" stroke-width="3" stroke-linecap="round"/>
                   <line x1="56" y1="32" x2="46" y2="34" stroke="#7F1D1D" stroke-width="3" stroke-linecap="round"/>
-                  <!-- Hidung & Senyum -->
                   <ellipse cx="40" cy="51" rx="4.5" ry="3.2" fill="#2B2B2B"/>
                   <path d="M34 57 Q40 62 46 57" fill="none" stroke="#2B2B2B" stroke-width="2.8" stroke-linecap="round"/>
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
                 <label for="inputRedName" class="block text-xs font-black uppercase tracking-wider text-[#EA2B2B] mb-1">
-                  Tim Kiri • Rubah Merah
+                  Tim Kiri • Foxy (Rubah Merah)
                 </label>
                 <input
                   id="inputRedName"
                   type="text"
-                  maxlength="15"
+                  maxlength="14"
                   value="Tim Merah"
                   placeholder="Nama Siswa 1"
-                  class="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-[#E5E5E5] focus:border-[#FF4B4B] focus:outline-none font-extrabold text-[#3C3C3C] text-base sm:text-lg transition"
+                  class="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-[#E5E5E5] focus:border-[#FF4B4B] focus:outline-none font-extrabold text-[#3C3C3C] text-base transition"
                 />
               </div>
             </div>
 
-            <!-- Kartu Tim Biru (Bubu) -->
-            <div class="rounded-2xl border-2 border-[#84D8FF] bg-[#DDF4FF]/55 p-3.5 sm:p-4 flex items-center gap-3.5">
-              <!-- Avatar SVG Beruang Biru -->
-              <div class="w-16 h-16 rounded-2xl bg-[#1CB0F6] border-b-4 border-[#1899D6] flex items-center justify-center shrink-0 overflow-hidden p-1">
+            <!-- Kartu Tim Biru (Bubu si Beruang Biru) -->
+            <div class="rounded-2xl border-2 border-[#84D8FF] bg-[#DDF4FF]/55 p-3.5 flex items-center gap-3.5">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#1CB0F6] border-b-4 border-[#1899D6] flex items-center justify-center shrink-0 overflow-hidden p-1">
                 <svg viewBox="0 0 80 80" class="w-full h-full">
-                  <!-- Telinga Beruang -->
                   <circle cx="20" cy="22" r="10" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
                   <circle cx="60" cy="22" r="10" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
                   <circle cx="20" cy="22" r="5" fill="#BAE6FD"/>
                   <circle cx="60" cy="22" r="5" fill="#BAE6FD"/>
-                  <!-- Kepala -->
                   <ellipse cx="40" cy="44" rx="26" ry="22" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
-                  <!-- Moncong Terang -->
                   <ellipse cx="40" cy="52" rx="13" ry="10" fill="#E0F2FE"/>
-                  <!-- Mata -->
                   <circle cx="29" cy="39" r="4.5" fill="#2B2B2B"/>
                   <circle cx="51" cy="39" r="4.5" fill="#2B2B2B"/>
                   <circle cx="30.5" cy="37.5" r="1.6" fill="#FFFFFF"/>
                   <circle cx="52.5" cy="37.5" r="1.6" fill="#FFFFFF"/>
-                  <!-- Alis -->
                   <line x1="24" y1="32" x2="34" y2="33" stroke="#0C4A6E" stroke-width="3" stroke-linecap="round"/>
                   <line x1="56" y1="32" x2="46" y2="33" stroke="#0C4A6E" stroke-width="3" stroke-linecap="round"/>
-                  <!-- Hidung & Senyum -->
                   <ellipse cx="40" cy="48" rx="4.8" ry="3.2" fill="#0C4A6E"/>
                   <path d="M34 55 Q40 60 46 55" fill="none" stroke="#0C4A6E" stroke-width="2.8" stroke-linecap="round"/>
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
                 <label for="inputBlueName" class="block text-xs font-black uppercase tracking-wider text-[#1899D6] mb-1">
-                  Tim Kanan • Beruang Biru
+                  Tim Kanan • Bubu (Beruang Biru)
                 </label>
                 <input
                   id="inputBlueName"
                   type="text"
-                  maxlength="15"
+                  maxlength="14"
                   value="Tim Biru"
                   placeholder="Nama Siswa 2"
-                  class="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-[#E5E5E5] focus:border-[#1CB0F6] focus:outline-none font-extrabold text-[#3C3C3C] text-base sm:text-lg transition"
+                  class="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-[#E5E5E5] focus:border-[#1CB0F6] focus:outline-none font-extrabold text-[#3C3C3C] text-base transition"
                 />
               </div>
             </div>
@@ -405,25 +447,25 @@
           </h2>
           <div id="difficultyGroup" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             
-            <button type="button" data-value="pemula" class="diff-btn duo-btn duo-card-selected-green p-4 text-left">
+            <button type="button" data-value="mudah" class="diff-btn duo-btn duo-card-selected-green p-3.5 sm:p-4 text-left">
               <div class="flex items-center justify-between mb-1">
-                <span class="font-black text-lg">Pemula</span>
+                <span class="font-black text-base sm:text-lg">Mudah</span>
                 <span class="px-2.5 py-0.5 rounded-lg bg-[#58CC02] text-white font-extrabold text-xs">SD 1–3</span>
               </div>
               <p class="text-xs font-bold opacity-80">Bilangan cacah 1–20, hitung cepat dasar</p>
             </button>
 
-            <button type="button" data-value="menengah" class="diff-btn duo-btn duo-btn-white p-4 text-left">
+            <button type="button" data-value="sedang" class="diff-btn duo-btn duo-btn-white p-3.5 sm:p-4 text-left">
               <div class="flex items-center justify-between mb-1">
-                <span class="font-black text-lg">Menengah</span>
+                <span class="font-black text-base sm:text-lg">Sedang</span>
                 <span class="px-2.5 py-0.5 rounded-lg bg-[#1CB0F6] text-white font-extrabold text-xs">SD 4–6</span>
               </div>
-              <p class="text-xs font-bold text-[#777777]">Operasi bilangan puluhan &amp; perkalian/pembagian</p>
+              <p class="text-xs font-bold text-[#777777]">Operasi puluhan &amp; tabel perkalian/pembagian</p>
             </button>
 
-            <button type="button" data-value="mahir" class="diff-btn duo-btn duo-btn-white p-4 text-left">
+            <button type="button" data-value="sulit" class="diff-btn duo-btn duo-btn-white p-3.5 sm:p-4 text-left">
               <div class="flex items-center justify-between mb-1">
-                <span class="font-black text-lg">Mahir</span>
+                <span class="font-black text-base sm:text-lg">Sulit</span>
                 <span class="px-2.5 py-0.5 rounded-lg bg-[#CE82FF] text-white font-extrabold text-xs">SMP</span>
               </div>
               <p class="text-xs font-bold text-[#777777]">Bilangan bulat negatif, kuadrat &amp; campuran</p>
@@ -432,85 +474,88 @@
           </div>
         </section>
 
-        <!-- BAGIAN 3: OPERASI MATEMATIKA (BISA PILIH SATU ATAU KOMBINASI) -->
+        <!-- BAGIAN 3: OPERASI MATEMATIKA (+, −, ×, ÷, CAMPURAN) -->
         <section class="duo-surface p-4 sm:p-6">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
             <h2 class="text-xs font-black uppercase tracking-widest text-[#AFAFAF]">
-              3. Operasi Matematika (Pilih Satu atau Kombinasi)
+              3. Operasi Matematika
             </h2>
             <span id="opHintBadge" class="text-xs font-extrabold text-[#1899D6] bg-[#DDF4FF] px-2.5 py-0.5 rounded-lg">
               2 Operasi Aktif
             </span>
           </div>
 
-          <div id="operationsGroup" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <button type="button" data-op="tambah" class="op-toggle-btn duo-btn duo-card-selected-blue p-3.5 flex flex-col items-center justify-center gap-1">
+          <div id="operationsGroup" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3">
+            <button type="button" data-op="tambah" class="op-toggle-btn duo-btn duo-card-selected-blue p-3 flex flex-col items-center justify-center gap-1">
               <span class="text-2xl font-black leading-none">+</span>
-              <span class="font-extrabold text-sm">Penjumlahan</span>
+              <span class="font-extrabold text-xs sm:text-sm">Tambah</span>
             </button>
 
-            <button type="button" data-op="kurang" class="op-toggle-btn duo-btn duo-card-selected-blue p-3.5 flex flex-col items-center justify-center gap-1">
+            <button type="button" data-op="kurang" class="op-toggle-btn duo-btn duo-card-selected-blue p-3 flex flex-col items-center justify-center gap-1">
               <span class="text-2xl font-black leading-none">−</span>
-              <span class="font-extrabold text-sm">Pengurangan</span>
+              <span class="font-extrabold text-xs sm:text-sm">Kurang</span>
             </button>
 
-            <button type="button" data-op="kali" class="op-toggle-btn duo-btn duo-btn-white p-3.5 flex flex-col items-center justify-center gap-1">
+            <button type="button" data-op="kali" class="op-toggle-btn duo-btn duo-btn-white p-3 flex flex-col items-center justify-center gap-1">
               <span class="text-2xl font-black leading-none">×</span>
-              <span class="font-extrabold text-sm">Perkalian</span>
+              <span class="font-extrabold text-xs sm:text-sm">Kali</span>
             </button>
 
-            <button type="button" data-op="bagi" class="op-toggle-btn duo-btn duo-btn-white p-3.5 flex flex-col items-center justify-center gap-1">
+            <button type="button" data-op="bagi" class="op-toggle-btn duo-btn duo-btn-white p-3 flex flex-col items-center justify-center gap-1">
               <span class="text-2xl font-black leading-none">÷</span>
-              <span class="font-extrabold text-sm">Pembagian</span>
+              <span class="font-extrabold text-xs sm:text-sm">Bagi</span>
+            </button>
+
+            <button type="button" id="btnOpCampuran" class="col-span-2 sm:col-span-1 duo-btn duo-btn-white p-3 flex flex-col items-center justify-center gap-1">
+              <span class="text-lg sm:text-xl font-black leading-none tracking-tight">+-×÷</span>
+              <span class="font-extrabold text-xs sm:text-sm">Campuran</span>
             </button>
           </div>
         </section>
 
-        <!-- BAGIAN 4: MODE KONTROL, TARGET TARIKAN, & BATAS WAKTU -->
+        <!-- BAGIAN 4: MODE JAWAB, TARGET MENANG, & OPSI TIMER -->
         <section class="duo-surface p-4 sm:p-6 space-y-5">
           
-          <!-- Mode Kontrol -->
           <div>
             <h2 class="text-xs font-black uppercase tracking-widest text-[#AFAFAF] mb-3">
-              4. Mode Kontrol Siswa
+              4. Mode Jawab Siswa
             </h2>
             <div id="modeGroup" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button type="button" data-value="keypad" class="mode-btn duo-btn duo-card-selected-blue p-4 text-left flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl bg-[#1CB0F6] text-white flex items-center justify-center shrink-0 font-black text-lg">
+              <button type="button" data-value="keypad" class="mode-btn duo-btn duo-card-selected-blue p-3.5 sm:p-4 text-left flex items-center gap-3.5">
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#1CB0F6] text-white flex items-center justify-center shrink-0 font-black text-base sm:text-lg">
                   123
                 </div>
                 <div>
-                  <div class="font-black text-base">Keypad Angka</div>
-                  <p class="text-xs font-bold opacity-80">Ketik langsung hasil hitung di papan tombol layar</p>
+                  <div class="font-black text-sm sm:text-base">Keypad Angka</div>
+                  <p class="text-xs font-bold opacity-80">Ketik langsung hasil hitung di layar sentuh</p>
                 </div>
               </button>
 
-              <button type="button" data-value="pilgan" class="mode-btn duo-btn duo-btn-white p-4 text-left flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl bg-[#F7F7F7] border-2 border-[#E5E5E5] text-[#3C3C3C] flex items-center justify-center shrink-0 font-black text-base">
+              <button type="button" data-value="pilgan" class="mode-btn duo-btn duo-btn-white p-3.5 sm:p-4 text-left flex items-center gap-3.5">
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#F7F7F7] border-2 border-[#E5E5E5] text-[#3C3C3C] flex items-center justify-center shrink-0 font-black text-sm sm:text-base">
                   A B
                 </div>
                 <div>
-                  <div class="font-black text-base">Pilihan Ganda</div>
-                  <p class="text-xs font-bold text-[#777777]">Pilih 1 dari 4 kartu jawaban besar (Sentuh / Keyboard)</p>
+                  <div class="font-black text-sm sm:text-base">Pilihan Ganda</div>
+                  <p class="text-xs font-bold text-[#777777]">Pilih 1 dari 4 kartu (Sentuh / QWER vs UIOP)</p>
                 </div>
               </button>
             </div>
           </div>
 
-          <!-- Grid Target & Timer -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
             <div>
               <h2 class="text-xs font-black uppercase tracking-widest text-[#AFAFAF] mb-2.5">
-                5. Target Tarikan Menang
+                5. Target Menang
               </h2>
-              <div id="targetGroup" class="grid grid-cols-3 gap-2.5">
-                <button type="button" data-value="5" class="target-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-sm">
+              <div id="targetGroup" class="grid grid-cols-3 gap-2">
+                <button type="button" data-value="5" class="target-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs sm:text-sm">
                   5 Langkah
                 </button>
-                <button type="button" data-value="7" class="target-btn duo-btn duo-card-selected-gold py-3 px-2 font-extrabold text-sm">
+                <button type="button" data-value="7" class="target-btn duo-btn duo-card-selected-gold py-3 px-2 font-extrabold text-xs sm:text-sm">
                   7 Langkah
                 </button>
-                <button type="button" data-value="10" class="target-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-sm">
+                <button type="button" data-value="10" class="target-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs sm:text-sm">
                   10 Langkah
                 </button>
               </div>
@@ -518,20 +563,17 @@
 
             <div>
               <h2 class="text-xs font-black uppercase tracking-widest text-[#AFAFAF] mb-2.5">
-                6. Batas Waktu
+                6. Opsi Timer
               </h2>
-              <div id="timerGroup" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <button type="button" data-value="0" class="timer-btn duo-btn duo-card-selected-green py-3 px-2 font-extrabold text-xs">
+              <div id="timerGroup" class="grid grid-cols-3 gap-2">
+                <button type="button" data-value="0" class="timer-btn duo-btn duo-card-selected-green py-3 px-2 font-extrabold text-xs sm:text-sm">
                   Tanpa Batas
                 </button>
-                <button type="button" data-value="60" class="timer-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs">
+                <button type="button" data-value="60" class="timer-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs sm:text-sm">
                   60 Detik
                 </button>
-                <button type="button" data-value="90" class="timer-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs">
+                <button type="button" data-value="90" class="timer-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs sm:text-sm">
                   90 Detik
-                </button>
-                <button type="button" data-value="120" class="timer-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs">
-                  120 Detik
                 </button>
               </div>
             </div>
@@ -543,10 +585,10 @@
           <button
             id="btnStartMatch"
             type="button"
-            class="duo-btn duo-btn-green w-full py-4 sm:py-5 px-8 text-xl sm:text-2xl font-black tracking-wider uppercase flex items-center justify-center gap-3"
+            class="duo-btn duo-btn-green w-full py-4 sm:py-5 px-6 text-lg sm:text-2xl font-black tracking-wider uppercase flex items-center justify-center gap-3"
           >
-            <span>MULAI MAIN</span>
-            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <span>MULAI PERTANDINGAN</span>
+            <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
@@ -562,59 +604,55 @@
   <!-- ===================================================================== -->
   <div id="gameScreen" class="hidden h-screen w-screen overflow-hidden flex flex-col bg-[#F7F7F7]">
     
-    <!-- BAGIAN ATAS (~36% TINGGI LAYAR): ARENA TARIK TAMBANG + HUD BERSIH -->
-    <section class="relative w-full h-[36%] min-h-[205px] max-h-[320px] bg-[#DDF4FF] border-b-4 border-[#E5E5E5] shrink-0 overflow-hidden">
+    <!-- BAGIAN ATAS (~34% TINGGI LAYAR): ARENA TARIK TAMBANG + HUD BERSIH -->
+    <section class="relative w-full h-[34%] min-h-[185px] max-h-[300px] bg-[#DDF4FF] border-b-4 border-[#E5E5E5] shrink-0 overflow-hidden">
       
       <!-- Canvas Arena Vektor Maskot -->
       <canvas id="arenaCanvas"></canvas>
 
       <!-- HUD Mengambang Atas (Kontrol & Indikator Posisi Tali) -->
-      <div class="absolute top-2.5 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none z-10">
+      <div class="absolute top-2 left-2 right-2 sm:top-2.5 sm:left-3 sm:right-3 flex items-center justify-between gap-1.5 pointer-events-none z-10">
         
-        <!-- Kiri: Tombol Pengaturan Ulang / Kembali -->
-        <div class="flex items-center gap-2 pointer-events-auto">
+        <!-- Kiri: Tombol Keluar ke Pengaturan -->
+        <div class="flex items-center gap-1.5 pointer-events-auto shrink-0">
           <button
             id="btnPauseSetup"
             type="button"
             title="Ubah Pengaturan"
-            class="duo-btn duo-btn-white px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center gap-1.5 font-extrabold text-xs sm:text-sm text-[#777777]"
+            class="duo-btn duo-btn-white h-9 sm:h-10 px-2.5 sm:px-3.5 flex items-center gap-1.5 font-extrabold text-xs sm:text-sm text-[#777777]"
           >
-            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#777777]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="w-4 h-4 text-[#777777]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
             <span class="hidden sm:inline">Keluar</span>
           </button>
 
-          <span id="hudModeBadge" class="hidden md:inline-block px-3 py-1.5 rounded-xl bg-white/90 border-2 border-[#E5E5E5] text-xs font-extrabold text-[#777777]">
-            PEMULA • + −
+          <span id="hudModeBadge" class="hidden lg:inline-block px-3 py-1.5 rounded-xl bg-white/90 border-2 border-[#E5E5E5] text-xs font-extrabold text-[#777777]">
+            MUDAH • + −
           </span>
         </div>
 
         <!-- Tengah: Bilah Progres Tarikan Tali & Timer -->
-        <div class="flex items-center gap-2 bg-white/95 border-2 border-[#E5E5E5] shadow-sm px-3 py-1.5 rounded-2xl">
-          <!-- Jarak Langkah Merah -->
-          <div class="flex items-center gap-1.5 font-black text-xs sm:text-sm text-[#FF4B4B]">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#FF4B4B]"></span>
+        <div class="flex items-center gap-1.5 sm:gap-2 bg-white/95 border-2 border-[#E5E5E5] shadow-sm px-2.5 sm:px-3 py-1.5 rounded-2xl">
+          <div class="flex items-center gap-1 font-black text-xs sm:text-sm text-[#FF4B4B]">
+            <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#FF4B4B]"></span>
             <span id="hudRedDistance">0/7</span>
           </div>
 
-          <!-- Track Mini Visual -->
-          <div class="w-24 sm:w-40 h-3 bg-[#E5E5E5] rounded-full overflow-hidden relative flex items-center">
+          <div class="w-16 sm:w-36 md:w-44 h-2.5 sm:h-3 bg-[#E5E5E5] rounded-full overflow-hidden relative flex items-center">
             <div id="hudGaugeFillRed" class="h-full bg-[#FF4B4B] transition-all duration-200" style="width: 50%"></div>
             <div id="hudGaugeFillBlue" class="h-full bg-[#1CB0F6] transition-all duration-200" style="width: 50%"></div>
             <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white -translate-x-1/2"></div>
           </div>
 
-          <!-- Jarak Langkah Biru -->
-          <div class="flex items-center gap-1.5 font-black text-xs sm:text-sm text-[#1CB0F6]">
+          <div class="flex items-center gap-1 font-black text-xs sm:text-sm text-[#1CB0F6]">
             <span id="hudBlueDistance">0/7</span>
-            <span class="w-2.5 h-2.5 rounded-full bg-[#1CB0F6]"></span>
+            <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#1CB0F6]"></span>
           </div>
 
-          <!-- Timer Pill (jika aktif) -->
-          <div id="hudTimerPill" class="hidden ml-1 pl-2 border-l-2 border-[#E5E5E5] font-black text-xs sm:text-sm text-[#3C3C3C] flex items-center gap-1">
-            <svg class="w-4 h-4 text-[#FF9600]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+          <div id="hudTimerPill" class="hidden ml-0.5 pl-1.5 sm:pl-2 border-l-2 border-[#E5E5E5] font-black text-xs sm:text-sm text-[#3C3C3C] flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF9600]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
@@ -622,15 +660,30 @@
           </div>
         </div>
 
-        <!-- Kanan: Tombol Mute/Unmute -->
-        <div class="pointer-events-auto">
+        <!-- Kanan: Tombol Toggle BGM & SFX Terpisah -->
+        <div class="flex items-center gap-1.5 pointer-events-auto shrink-0">
           <button
-            id="btnGameSound"
+            id="btnGameBgm"
             type="button"
-            title="Suara Hidup/Mati"
-            class="duo-btn duo-btn-white p-2 sm:px-3 sm:py-2 flex items-center justify-center"
+            title="Musik Latar (BGM)"
+            aria-label="Musik Latar"
+            class="duo-btn duo-card-selected-blue h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center gap-0.5"
           >
-            <svg id="gameSoundIconSvg" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1CB0F6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+          </button>
+
+          <button
+            id="btnGameSfx"
+            type="button"
+            title="Efek Suara (SFX)"
+            aria-label="Efek Suara"
+            class="duo-btn duo-btn-white h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center text-[#1CB0F6]"
+          >
+            <svg id="sfxIconGame" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
               <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
               <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
@@ -641,17 +694,16 @@
       </div>
     </section>
 
-    <!-- BAGIAN BAWAH (~64% TINGGI LAYAR): SPLIT-SCREEN 2 PEMAIN SIMETRIS -->
-    <main class="flex-1 grid grid-cols-2 divide-x-[3px] divide-[#E5E5E5] bg-white overflow-hidden">
+    <!-- BAGIAN BAWAH (~66% TINGGI LAYAR): SPLIT-SCREEN 2 PEMAIN SIMETRIS -->
+    <main class="flex-1 grid grid-cols-2 divide-x-[2px] sm:divide-x-[3px] divide-[#E5E5E5] bg-white overflow-hidden">
       
       <!-- ==================== PANEL KIRI: TIM MERAH (FOXY) ==================== -->
-      <section id="panelRed" class="h-full flex flex-col p-2.5 sm:p-4 bg-[#FFFDFD] overflow-hidden relative">
+      <section id="panelRed" class="h-full flex flex-col p-2 sm:p-4 bg-[#FFFDFD] overflow-hidden relative">
         
         <!-- Header Tim Merah -->
-        <div class="flex items-center justify-between gap-2 pb-2 shrink-0">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <!-- Mini Avatar Rubah Merah -->
-            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#FF4B4B] border-b-[3px] border-[#EA2B2B] flex items-center justify-center shrink-0 p-0.5">
+        <div class="flex items-center justify-between gap-1.5 pb-1.5 sm:pb-2 shrink-0 relative">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-[#FF4B4B] border-b-[3px] border-[#EA2B2B] flex items-center justify-center shrink-0 p-0.5">
               <svg viewBox="0 0 80 80" class="w-full h-full">
                 <polygon points="16,32 12,8 34,20" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="4" stroke-linejoin="round"/>
                 <polygon points="64,32 68,8 46,20" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="4" stroke-linejoin="round"/>
@@ -664,20 +716,17 @@
               </svg>
             </div>
             <div class="min-w-0">
-              <h2 id="nameLabelRed" class="font-black text-sm sm:text-lg text-[#3C3C3C] truncate leading-tight">
+              <h2 id="nameLabelRed" class="font-black text-xs sm:text-lg text-[#3C3C3C] truncate leading-tight">
                 Tim Merah
               </h2>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FFDFE0] text-[#EA2B2B] font-extrabold text-xs">
+              <div class="flex items-center gap-1 mt-0.5">
+                <span class="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg bg-[#FFDFE0] text-[#EA2B2B] font-extrabold text-[11px] sm:text-xs">
                   <span>Skor:</span>
                   <strong id="scoreValRed">0</strong>
                 </span>
 
-                <!-- Lencana Api Streak Khas Duolingo -->
-                <span id="streakBadgeRed" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FFF0D6] border border-[#FF9600] text-[#CC7800] font-black text-xs animate-streak">
-                  <svg class="w-3.5 h-3.5 text-[#FF9600]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C12 2 7 7.5 7 13a5 5 0 0 0 10 0c0-2.5-1.5-4.5-2.5-5.5 0 2-1.5 3-2.5 3 0-3 0-8.5 0-8.5z"/>
-                  </svg>
+                <span id="streakBadgeRed" class="hidden inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg bg-[#FFF0D6] border border-[#FF9600] text-[#CC7800] font-black text-[11px] sm:text-xs animate-streak">
+                  <span>🔥</span>
                   <span id="streakCountRed">2x</span>
                 </span>
               </div>
@@ -685,47 +734,46 @@
           </div>
 
           <!-- Toast Umpan Balik Cepat -->
-          <div id="toastRed" class="px-2.5 py-1 rounded-xl font-black text-xs sm:text-sm opacity-0 transition-opacity duration-150 shrink-0">
+          <div id="toastRed" class="absolute right-0 top-0 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl font-black text-[11px] sm:text-sm opacity-0 pointer-events-none transition-opacity duration-150 shadow-xs">
             Benar!
           </div>
         </div>
 
         <!-- Kartu Soal Matematika Kontras Tinggi -->
-        <div id="questionBoxRed" class="relative my-1.5 sm:my-2 rounded-2xl bg-white border-2 border-[#E5E5E5] shadow-[0_4px_0_#E5E5E5] px-3 py-2.5 sm:py-3.5 flex flex-col items-center justify-center shrink-0">
-          <div id="questionTextRed" class="font-black text-3xl sm:text-4xl lg:text-5xl text-[#3C3C3C] tracking-tight text-center leading-none">
+        <div id="questionBoxRed" class="relative my-1 sm:my-2 rounded-2xl bg-white border-2 border-[#E5E5E5] shadow-[0_4px_0_#E5E5E5] px-2 sm:px-3 py-2 sm:py-3.5 flex flex-col items-center justify-center shrink-0">
+          <div id="questionTextRed" class="font-black text-2xl sm:text-4xl lg:text-5xl text-[#3C3C3C] tracking-tight text-center leading-none">
             8 + 5 = ?
           </div>
 
           <!-- Kotak Tampilan Jawaban Aktif (Khusus Mode Keypad) -->
-          <div id="answerBarRed" class="mt-2.5 w-full max-w-[260px] h-11 sm:h-12 rounded-xl bg-[#F7F7F7] border-2 border-[#E5E5E5] flex items-center justify-center px-3 transition-colors">
-            <span id="answerTextRed" class="font-black text-2xl sm:text-3xl text-[#FF4B4B] tracking-wider"></span>
-            <span class="w-[3px] h-6 bg-[#FF4B4B] rounded-full ml-1 animate-pulse"></span>
+          <div id="answerBarRed" class="mt-2 w-full max-w-[250px] h-9 sm:h-12 rounded-xl bg-[#F7F7F7] border-2 border-[#E5E5E5] flex items-center justify-center px-2.5 transition-colors">
+            <span id="answerTextRed" class="font-black text-xl sm:text-3xl text-[#FF4B4B] tracking-wider"></span>
+            <span class="w-[3px] h-5 sm:h-6 bg-[#FF4B4B] rounded-full ml-1 animate-pulse"></span>
           </div>
 
           <!-- Overlay Penalti 1,5 Detik dengan Bilah Progres Pemulihan -->
-          <div id="cooldownOverlayRed" class="hidden absolute inset-0 rounded-2xl bg-[#FFDFE0] border-2 border-[#FF4B4B] flex flex-col items-center justify-center px-4 text-center z-10">
-            <div class="font-black text-base sm:text-lg text-[#EA2B2B]">
+          <div id="cooldownOverlayRed" class="hidden absolute inset-0 rounded-2xl bg-[#FFDFE0] border-2 border-[#FF4B4B] flex flex-col items-center justify-center px-3 text-center z-10">
+            <div class="font-black text-xs sm:text-lg text-[#EA2B2B]">
               Kurang Tepat! Coba Lagi
             </div>
-            <div class="w-full max-w-[210px] h-2.5 bg-white rounded-full overflow-hidden mt-2 border border-[#FF9696]">
+            <div class="w-full max-w-[190px] h-2 sm:h-2.5 bg-white rounded-full overflow-hidden mt-1.5 sm:mt-2 border border-[#FF9696]">
               <div id="cooldownBarRed" class="h-full bg-[#FF4B4B] w-full"></div>
             </div>
           </div>
         </div>
 
         <!-- Area Input Jawaban (Keypad 3D atau Pilihan Ganda 2x2) -->
-        <div id="controlsRed" class="flex-1 min-h-0 flex flex-col pt-1"></div>
+        <div id="controlsRed" class="flex-1 min-h-0 flex flex-col pt-0.5 sm:pt-1"></div>
 
       </section>
 
       <!-- ==================== PANEL KANAN: TIM BIRU (BUBU) ==================== -->
-      <section id="panelBlue" class="h-full flex flex-col p-2.5 sm:p-4 bg-[#FCFEFF] overflow-hidden relative">
+      <section id="panelBlue" class="h-full flex flex-col p-2 sm:p-4 bg-[#FCFEFF] overflow-hidden relative">
         
         <!-- Header Tim Biru -->
-        <div class="flex items-center justify-between gap-2 pb-2 shrink-0">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <!-- Mini Avatar Beruang Biru -->
-            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#1CB0F6] border-b-[3px] border-[#1899D6] flex items-center justify-center shrink-0 p-0.5">
+        <div class="flex items-center justify-between gap-1.5 pb-1.5 sm:pb-2 shrink-0 relative">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-[#1CB0F6] border-b-[3px] border-[#1899D6] flex items-center justify-center shrink-0 p-0.5">
               <svg viewBox="0 0 80 80" class="w-full h-full">
                 <circle cx="20" cy="22" r="10" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="4"/>
                 <circle cx="60" cy="22" r="10" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="4"/>
@@ -737,20 +785,17 @@
               </svg>
             </div>
             <div class="min-w-0">
-              <h2 id="nameLabelBlue" class="font-black text-sm sm:text-lg text-[#3C3C3C] truncate leading-tight">
+              <h2 id="nameLabelBlue" class="font-black text-xs sm:text-lg text-[#3C3C3C] truncate leading-tight">
                 Tim Biru
               </h2>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#DDF4FF] text-[#1899D6] font-extrabold text-xs">
+              <div class="flex items-center gap-1 mt-0.5">
+                <span class="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg bg-[#DDF4FF] text-[#1899D6] font-extrabold text-[11px] sm:text-xs">
                   <span>Skor:</span>
                   <strong id="scoreValBlue">0</strong>
                 </span>
 
-                <!-- Lencana Api Streak Khas Duolingo -->
-                <span id="streakBadgeBlue" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FFF0D6] border border-[#FF9600] text-[#CC7800] font-black text-xs animate-streak">
-                  <svg class="w-3.5 h-3.5 text-[#FF9600]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C12 2 7 7.5 7 13a5 5 0 0 0 10 0c0-2.5-1.5-4.5-2.5-5.5 0 2-1.5 3-2.5 3 0-3 0-8.5 0-8.5z"/>
-                  </svg>
+                <span id="streakBadgeBlue" class="hidden inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg bg-[#FFF0D6] border border-[#FF9600] text-[#CC7800] font-black text-[11px] sm:text-xs animate-streak">
+                  <span>🔥</span>
                   <span id="streakCountBlue">2x</span>
                 </span>
               </div>
@@ -758,36 +803,36 @@
           </div>
 
           <!-- Toast Umpan Balik Cepat -->
-          <div id="toastBlue" class="px-2.5 py-1 rounded-xl font-black text-xs sm:text-sm opacity-0 transition-opacity duration-150 shrink-0">
+          <div id="toastBlue" class="absolute right-0 top-0 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl font-black text-[11px] sm:text-sm opacity-0 pointer-events-none transition-opacity duration-150 shadow-xs">
             Benar!
           </div>
         </div>
 
         <!-- Kartu Soal Matematika Kontras Tinggi -->
-        <div id="questionBoxBlue" class="relative my-1.5 sm:my-2 rounded-2xl bg-white border-2 border-[#E5E5E5] shadow-[0_4px_0_#E5E5E5] px-3 py-2.5 sm:py-3.5 flex flex-col items-center justify-center shrink-0">
-          <div id="questionTextBlue" class="font-black text-3xl sm:text-4xl lg:text-5xl text-[#3C3C3C] tracking-tight text-center leading-none">
+        <div id="questionBoxBlue" class="relative my-1 sm:my-2 rounded-2xl bg-white border-2 border-[#E5E5E5] shadow-[0_4px_0_#E5E5E5] px-2 sm:px-3 py-2 sm:py-3.5 flex flex-col items-center justify-center shrink-0">
+          <div id="questionTextBlue" class="font-black text-2xl sm:text-4xl lg:text-5xl text-[#3C3C3C] tracking-tight text-center leading-none">
             12 − 4 = ?
           </div>
 
           <!-- Kotak Tampilan Jawaban Aktif (Khusus Mode Keypad) -->
-          <div id="answerBarBlue" class="mt-2.5 w-full max-w-[260px] h-11 sm:h-12 rounded-xl bg-[#F7F7F7] border-2 border-[#E5E5E5] flex items-center justify-center px-3 transition-colors">
-            <span id="answerTextBlue" class="font-black text-2xl sm:text-3xl text-[#1CB0F6] tracking-wider"></span>
-            <span class="w-[3px] h-6 bg-[#1CB0F6] rounded-full ml-1 animate-pulse"></span>
+          <div id="answerBarBlue" class="mt-2 w-full max-w-[250px] h-9 sm:h-12 rounded-xl bg-[#F7F7F7] border-2 border-[#E5E5E5] flex items-center justify-center px-2.5 transition-colors">
+            <span id="answerTextBlue" class="font-black text-xl sm:text-3xl text-[#1CB0F6] tracking-wider"></span>
+            <span class="w-[3px] h-5 sm:h-6 bg-[#1CB0F6] rounded-full ml-1 animate-pulse"></span>
           </div>
 
           <!-- Overlay Penalti 1,5 Detik dengan Bilah Progres Pemulihan -->
-          <div id="cooldownOverlayBlue" class="hidden absolute inset-0 rounded-2xl bg-[#FFDFE0] border-2 border-[#FF4B4B] flex flex-col items-center justify-center px-4 text-center z-10">
-            <div class="font-black text-base sm:text-lg text-[#EA2B2B]">
+          <div id="cooldownOverlayBlue" class="hidden absolute inset-0 rounded-2xl bg-[#FFDFE0] border-2 border-[#FF4B4B] flex flex-col items-center justify-center px-3 text-center z-10">
+            <div class="font-black text-xs sm:text-lg text-[#EA2B2B]">
               Kurang Tepat! Coba Lagi
             </div>
-            <div class="w-full max-w-[210px] h-2.5 bg-white rounded-full overflow-hidden mt-2 border border-[#FF9696]">
+            <div class="w-full max-w-[190px] h-2 sm:h-2.5 bg-white rounded-full overflow-hidden mt-1.5 sm:mt-2 border border-[#FF9696]">
               <div id="cooldownBarBlue" class="h-full bg-[#FF4B4B] w-full"></div>
             </div>
           </div>
         </div>
 
         <!-- Area Input Jawaban (Keypad 3D atau Pilihan Ganda 2x2) -->
-        <div id="controlsBlue" class="flex-1 min-h-0 flex flex-col pt-1"></div>
+        <div id="controlsBlue" class="flex-1 min-h-0 flex flex-col pt-0.5 sm:pt-1"></div>
 
       </section>
 
@@ -797,16 +842,13 @@
   <!-- ===================================================================== -->
   <!-- 3. LAYAR HASIL & STATISTIK PERTANDINGAN (VICTORY MODAL)               -->
   <!-- ===================================================================== -->
-  <div id="victoryModal" class="hidden fixed inset-0 z-50 bg-[#3C3C3C]/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
-    <!-- Canvas Konfeti -->
+  <div id="victoryModal" class="hidden fixed inset-0 z-50 bg-[#3C3C3C]/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
     <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
-    <div class="relative z-10 w-full max-w-xl bg-white border-2 border-[#E5E5E5] shadow-[0_8px_0_#E5E5E5] rounded-3xl p-5 sm:p-7 text-center animate-duo-pop">
+    <div class="relative z-10 w-full max-w-xl bg-white border-2 border-[#E5E5E5] shadow-[0_8px_0_#E5E5E5] rounded-3xl p-4 sm:p-7 text-center my-auto animate-duo-pop">
       
       <!-- Ilustrasi Maskot Pemenang Bermahkota Emas -->
-      <div id="winnerMascotContainer" class="w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-2 animate-float-bob">
-        <!-- Diisi dinamis oleh JS sesuai pemenang -->
-      </div>
+      <div id="winnerMascotContainer" class="w-20 h-20 sm:w-28 sm:h-28 mx-auto mb-2 animate-float-bob"></div>
 
       <!-- Banner Pemenang Bergaya Duolingo -->
       <div id="victoryBadge" class="inline-block px-3.5 py-1 rounded-xl bg-[#FFF5CC] border-2 border-[#FFC800] text-[#997300] font-black text-xs uppercase tracking-wider mb-1.5">
@@ -816,51 +858,56 @@
       <h2 id="victoryHeadline" class="text-2xl sm:text-4xl font-black text-[#3C3C3C] tracking-tight">
         Tim Merah Menang!
       </h2>
-      <p id="victorySubtext" class="text-xs sm:text-sm font-bold text-[#777777] mt-1 mb-5">
+      <p id="victorySubtext" class="text-xs sm:text-sm font-bold text-[#777777] mt-1 mb-4 sm:mb-5">
         Berhasil menarik tali melewati garis kemenangan!
       </p>
 
       <!-- Kartu Perbandingan Statistik 2 Siswa -->
-      <div class="rounded-2xl border-2 border-[#E5E5E5] overflow-hidden mb-6">
+      <div class="rounded-2xl border-2 border-[#E5E5E5] overflow-hidden mb-5">
         <table class="w-full text-xs sm:text-sm border-collapse">
           <thead>
             <tr class="bg-[#F7F7F7] border-b-2 border-[#E5E5E5] font-black text-[#3C3C3C]">
-              <th class="py-2.5 px-3 text-left text-[#777777]">Statistik</th>
-              <th id="statColRed" class="py-2.5 px-3 text-center text-[#FF4B4B]">Tim Merah</th>
-              <th id="statColBlue" class="py-2.5 px-3 text-center text-[#1CB0F6]">Tim Biru</th>
+              <th class="py-2 px-3 text-left text-[#777777]">Statistik</th>
+              <th id="statColRed" class="py-2 px-3 text-center text-[#FF4B4B]">Tim Merah</th>
+              <th id="statColBlue" class="py-2 px-3 text-center text-[#1CB0F6]">Tim Biru</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-[#E5E5E5] font-extrabold text-[#3C3C3C]">
             <tr>
-              <td class="py-2.5 px-3 text-left text-[#777777]">Total Soal Benar</td>
-              <td id="statBenarRed" class="py-2.5 px-3 text-center text-base text-[#FF4B4B]">0</td>
-              <td id="statBenarBlue" class="py-2.5 px-3 text-center text-base text-[#1CB0F6]">0</td>
+              <td class="py-2 px-3 text-left text-[#777777]">Total Tarikan</td>
+              <td id="statPullRed" class="py-2 px-3 text-center text-sm sm:text-base text-[#FF4B4B]">0</td>
+              <td id="statPullBlue" class="py-2 px-3 text-center text-sm sm:text-base text-[#1CB0F6]">0</td>
             </tr>
             <tr>
-              <td class="py-2.5 px-3 text-left text-[#777777]">Akurasi Jawaban</td>
-              <td id="statAkurasiRed" class="py-2.5 px-3 text-center">0%</td>
-              <td id="statAkurasiBlue" class="py-2.5 px-3 text-center">0%</td>
+              <td class="py-2 px-3 text-left text-[#777777]">Jawaban Benar</td>
+              <td id="statBenarRed" class="py-2 px-3 text-center">0</td>
+              <td id="statBenarBlue" class="py-2 px-3 text-center">0</td>
             </tr>
             <tr>
-              <td class="py-2.5 px-3 text-left text-[#777777]">Kecepatan Rata-rata</td>
-              <td id="statSpeedRed" class="py-2.5 px-3 text-center">- dtk/soal</td>
-              <td id="statSpeedBlue" class="py-2.5 px-3 text-center">- dtk/soal</td>
+              <td class="py-2 px-3 text-left text-[#777777]">Akurasi (%)</td>
+              <td id="statAkurasiRed" class="py-2 px-3 text-center">0%</td>
+              <td id="statAkurasiBlue" class="py-2 px-3 text-center">0%</td>
             </tr>
             <tr>
-              <td class="py-2.5 px-3 text-left text-[#777777]">Streak Tertinggi</td>
-              <td id="statStreakRed" class="py-2.5 px-3 text-center text-[#FF9600]">0x</td>
-              <td id="statStreakBlue" class="py-2.5 px-3 text-center text-[#FF9600]">0x</td>
+              <td class="py-2 px-3 text-left text-[#777777]">Kecepatan Rata-rata</td>
+              <td id="statSpeedRed" class="py-2 px-3 text-center">- dtk/soal</td>
+              <td id="statSpeedBlue" class="py-2 px-3 text-center">- dtk/soal</td>
+            </tr>
+            <tr>
+              <td class="py-2 px-3 text-left text-[#777777]">Streak Tertinggi</td>
+              <td id="statStreakRed" class="py-2 px-3 text-center text-[#FF9600]">0x</td>
+              <td id="statStreakBlue" class="py-2 px-3 text-center text-[#FF9600]">0x</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <!-- Tombol Aksi Juicy 3D -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
         <button
           id="btnPlayAgain"
           type="button"
-          class="duo-btn duo-btn-green py-3.5 px-5 font-black text-base sm:text-lg uppercase tracking-wide"
+          class="duo-btn duo-btn-green py-3.5 px-5 font-black text-sm sm:text-lg uppercase tracking-wide"
         >
           MAIN LAGI
         </button>
@@ -868,9 +915,9 @@
         <button
           id="btnBackToSettings"
           type="button"
-          class="duo-btn duo-btn-white py-3.5 px-5 font-black text-base sm:text-lg text-[#1CB0F6] uppercase tracking-wide"
+          class="duo-btn duo-btn-white py-3.5 px-5 font-black text-sm sm:text-lg text-[#1CB0F6] uppercase tracking-wide"
         >
-          UBAH PENGATURAN
+          PENGATURAN
         </button>
       </div>
 
@@ -878,148 +925,164 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 4. MODAL INSTAL SEBAGAI APLIKASI & EKSPOR FILE GITHUB PAGES (PWA)     -->
+  <!-- 4. MODAL INSTAL SEBAGAI APLIKASI ADAPTIF (HP, LAPTOP, & FILE GITHUB)  -->
   <!-- ===================================================================== -->
   <div id="installModal" class="hidden fixed inset-0 z-50 bg-[#3C3C3C]/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-    <div class="relative w-full max-w-2xl bg-white border-2 border-[#E5E5E5] shadow-[0_8px_0_#E5E5E5] rounded-3xl p-5 sm:p-7 my-auto animate-duo-pop">
+    <div class="relative w-full max-w-xl bg-white border-2 border-[#E5E5E5] shadow-[0_8px_0_#E5E5E5] rounded-3xl p-4 sm:p-6 my-auto animate-duo-pop">
       
       <!-- Tombol Tutup Modal -->
       <button
         id="btnCloseInstallModal"
         type="button"
         aria-label="Tutup"
-        class="duo-btn duo-btn-white absolute top-4 right-4 w-10 h-10 flex items-center justify-center font-black text-lg text-[#777777]"
+        class="duo-btn duo-btn-white absolute top-3.5 right-3.5 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center font-black text-base text-[#777777]"
       >
         ✕
       </button>
 
       <!-- Header Identitas Aplikasi PWA -->
-      <div class="flex items-center gap-4 pr-10 mb-5">
+      <div class="flex items-center gap-3.5 pr-10 mb-4">
         <img
           id="modalAppIconPreview"
           alt="Ikon Tarik Tambang Matematika"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-[#58A700] shadow-sm shrink-0 bg-[#58CC02]"
+          class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 border-[#58A700] shadow-xs shrink-0 bg-[#58CC02]"
         />
         <div>
-          <span id="installStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#DDF4FF] text-[#1899D6] font-extrabold text-xs uppercase tracking-wider mb-1">
+          <span id="installStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#DDF4FF] text-[#1899D6] font-extrabold text-[11px] uppercase tracking-wider mb-1">
             Aplikasi Web Progresif (PWA)
           </span>
-          <h2 class="text-xl sm:text-2xl font-black text-[#3C3C3C] leading-tight">
+          <h2 class="text-lg sm:text-2xl font-black text-[#3C3C3C] leading-tight">
             Instal Sebagai Aplikasi
           </h2>
-          <p class="text-xs sm:text-sm font-bold text-[#777777] mt-0.5">
-            Jalankan layar penuh tanpa bilah browser di laptop, tablet, atau smartboard kelas.
+          <p class="text-xs font-bold text-[#777777] mt-0.5">
+            Tampil layar penuh tanpa bilah browser di HP, tablet, maupun laptop.
           </p>
         </div>
       </div>
 
-      <!-- Tombol Instal Langsung via Browser Prompt -->
-      <div class="rounded-2xl bg-[#F7F7F7] border-2 border-[#E5E5E5] p-4 mb-4">
+      <!-- Banner Instalasi Langsung Satu Klik (Muncul Menonjol jika beforeinstallprompt Siap) -->
+      <div id="directInstallBanner" class="hidden rounded-2xl bg-[#D7FFB8]/65 border-2 border-[#58CC02] p-3.5 mb-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div class="font-black text-sm sm:text-base text-[#3C3C3C]">
-              Instalasi Satu Klik (Chrome / Edge)
+            <div class="font-black text-sm text-[#2B5900]">
+              Siap Dipasang Langsung ke Perangkat!
             </div>
-            <p id="installPromptHint" class="text-xs font-bold text-[#777777] mt-0.5">
-              Klik tombol di samping untuk memasang pintasan aplikasi ke perangkat ini.
+            <p class="text-xs font-bold text-[#2B5900]/80 mt-0.5">
+              Klik tombol hijau untuk menambahkan ikon ke layar utama / desktop.
             </p>
           </div>
           <button
             id="btnModalInstallNow"
             type="button"
-            class="duo-btn duo-btn-green px-5 py-3 font-black text-sm uppercase tracking-wide shrink-0 flex items-center justify-center gap-2"
+            class="duo-btn duo-btn-green px-4 py-2.5 font-black text-xs sm:text-sm uppercase tracking-wide shrink-0 flex items-center justify-center gap-2"
           >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>Instal Sekarang</span>
+            <span>Pasang Aplikasi Sekarang</span>
           </button>
         </div>
       </div>
 
-      <!-- Panduan Langkah Demi Langkah Chrome & Safari -->
-      <div class="space-y-2.5 mb-5">
-        <h3 class="text-xs font-black uppercase tracking-widest text-[#AFAFAF]">
-          Panduan Instal Manual &amp; Buat Pintasan
-        </h3>
+      <!-- Tab Navigasi Panduan Perangkat & File GitHub -->
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <button type="button" data-tab="hp" class="install-tab-btn duo-btn duo-card-selected-blue py-2.5 px-2 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5">
+          <span>📱</span>
+          <span>HP / Tablet</span>
+        </button>
+        <button type="button" data-tab="laptop" class="install-tab-btn duo-btn duo-btn-white py-2.5 px-2 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5">
+          <span>💻</span>
+          <span>Laptop / PC</span>
+        </button>
+        <button type="button" data-tab="github" class="install-tab-btn duo-btn duo-btn-white py-2.5 px-2 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5">
+          <span>🚀</span>
+          <span>File GitHub</span>
+        </button>
+      </div>
 
-        <!-- Chrome Desktop -->
+      <!-- KONTEN TAB 1: PANDUAN HP / TABLET -->
+      <div id="tabContentHp" class="install-tab-panel space-y-2.5">
         <div class="rounded-2xl border-2 border-[#E5E5E5] p-3.5 flex items-start gap-3">
-          <div class="w-8 h-8 rounded-xl bg-[#D7FFB8] text-[#58A700] font-black text-sm flex items-center justify-center shrink-0">
+          <div class="w-7 h-7 rounded-xl bg-[#D7FFB8] text-[#58A700] font-black text-xs flex items-center justify-center shrink-0">
             1
           </div>
           <div class="text-xs sm:text-sm font-bold text-[#3C3C3C]">
-            <span class="font-black text-[#58A700]">Google Chrome Desktop (Windows / Mac / Chromebook):</span>
-            Klik ikon <span class="px-1.5 py-0.5 rounded bg-[#F7F7F7] border border-[#E5E5E5] font-black">⋮</span> di pojok kanan atas → pilih
+            <span class="font-black text-[#58A700]">Chrome Android (HP &amp; Tablet):</span>
+            Ketuk ikon titik tiga <span class="px-1.5 py-0.5 rounded bg-[#F7F7F7] border border-[#E5E5E5] font-black">⋮</span> di pojok kanan atas browser → pilih
+            <span class="font-black text-[#1899D6]">Instal aplikasi</span> atau <span class="font-black text-[#1899D6]">Tambahkan ke layar utama</span>.
+          </div>
+        </div>
+
+        <div class="rounded-2xl border-2 border-[#E5E5E5] p-3.5 flex items-start gap-3">
+          <div class="w-7 h-7 rounded-xl bg-[#FFF5CC] text-[#997300] font-black text-xs flex items-center justify-center shrink-0">
+            2
+          </div>
+          <div class="text-xs sm:text-sm font-bold text-[#3C3C3C]">
+            <span class="font-black text-[#997300]">Safari iPhone &amp; iPad (iOS):</span>
+            Ketuk tombol <span class="font-black">Bagikan (Share ⬆)</span> di bilah bawah/atas → gulir ke bawah dan ketuk
+            <span class="font-black text-[#1899D6]">Tambah ke Layar Utama</span>.
+          </div>
+        </div>
+      </div>
+
+      <!-- KONTEN TAB 2: PANDUAN LAPTOP / PC -->
+      <div id="tabContentLaptop" class="install-tab-panel hidden space-y-2.5">
+        <div class="rounded-2xl border-2 border-[#E5E5E5] p-3.5 flex items-start gap-3">
+          <div class="w-7 h-7 rounded-xl bg-[#DDF4FF] text-[#1899D6] font-black text-xs flex items-center justify-center shrink-0">
+            1
+          </div>
+          <div class="text-xs sm:text-sm font-bold text-[#3C3C3C]">
+            <span class="font-black text-[#1899D6]">Cara Tercepat (Ikon Address Bar):</span>
+            Klik ikon <span class="font-black">Instal Aplikasi (Monitor + Panah Bawah)</span> di sisi kanan bilah alamat URL Chrome atau Microsoft Edge.
+          </div>
+        </div>
+
+        <div class="rounded-2xl border-2 border-[#E5E5E5] p-3.5 flex items-start gap-3">
+          <div class="w-7 h-7 rounded-xl bg-[#D7FFB8] text-[#58A700] font-black text-xs flex items-center justify-center shrink-0">
+            2
+          </div>
+          <div class="text-xs sm:text-sm font-bold text-[#3C3C3C]">
+            <span class="font-black text-[#58A700]">Lewat Menu Chrome / Buat Pintasan:</span>
+            Klik <span class="px-1.5 py-0.5 rounded bg-[#F7F7F7] border border-[#E5E5E5] font-black">⋮</span> di pojok kanan atas → pilih
             <span class="font-black">Simpan dan bagikan</span> → klik
             <span class="font-black text-[#1899D6]">Instal halaman sebagai aplikasi...</span> atau
             <span class="font-black text-[#1899D6]">Buat pintasan...</span> (centang <em>Buka sebagai jendela</em>).
           </div>
         </div>
-
-        <!-- Chrome Android -->
-        <div class="rounded-2xl border-2 border-[#E5E5E5] p-3.5 flex items-start gap-3">
-          <div class="w-8 h-8 rounded-xl bg-[#DDF4FF] text-[#1899D6] font-black text-sm flex items-center justify-center shrink-0">
-            2
-          </div>
-          <div class="text-xs sm:text-sm font-bold text-[#3C3C3C]">
-            <span class="font-black text-[#1899D6]">Chrome Android (HP / Tablet):</span>
-            Ketuk ikon <span class="px-1.5 py-0.5 rounded bg-[#F7F7F7] border border-[#E5E5E5] font-black">⋮</span> → pilih
-            <span class="font-black">Instal aplikasi</span> atau <span class="font-black">Tambahkan ke layar utama</span>.
-          </div>
-        </div>
-
-        <!-- Safari iOS -->
-        <div class="rounded-2xl border-2 border-[#E5E5E5] p-3.5 flex items-start gap-3">
-          <div class="w-8 h-8 rounded-xl bg-[#FFF5CC] text-[#997300] font-black text-sm flex items-center justify-center shrink-0">
-            3
-          </div>
-          <div class="text-xs sm:text-sm font-bold text-[#3C3C3C]">
-            <span class="font-black text-[#997300]">Safari iPad / iPhone (iOS):</span>
-            Ketuk tombol <span class="font-black">Bagikan (Share)</span> di bilah menu → gulir ke bawah dan ketuk
-            <span class="font-black">Tambah ke Layar Utama</span>.
-          </div>
-        </div>
       </div>
 
-      <!-- Bagian Unduh File untuk GitHub Pages & Cache Offline -->
-      <div class="rounded-2xl border-2 border-[#84D8FF] bg-[#DDF4FF]/40 p-4">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <span class="font-black text-xs sm:text-sm text-[#0B4F71] uppercase tracking-wider">
-            Paket Upload GitHub Pages &amp; Mode Offline
-          </span>
-          <span class="text-[11px] font-extrabold text-[#1899D6] bg-white px-2 py-0.5 rounded-lg border border-[#84D8FF]">
-            Siap Upload
-          </span>
-        </div>
-        <p class="text-xs font-bold text-[#3C3C3C]/80 mb-3">
-          Cukup unggah <code class="font-black text-[#0B4F71]">index.html</code> ke repositori GitHub Pages Anda. Jika ingin dukungan penuh tanpa internet (offline) di kelas, unduh juga <code class="font-black text-[#0B4F71]">manifest.json</code> dan <code class="font-black text-[#0B4F71]">sw.js</code> lalu letakkan di folder yang sama.
-        </p>
+      <!-- KONTEN TAB 3: FILE GITHUB PAGES & MODE OFFLINE -->
+      <div id="tabContentGithub" class="install-tab-panel hidden space-y-3">
+        <div class="rounded-2xl border-2 border-[#84D8FF] bg-[#DDF4FF]/40 p-3.5">
+          <p class="text-xs font-bold text-[#3C3C3C] mb-3 leading-relaxed">
+            Unggah <code class="font-black text-[#0B4F71]">index.html</code> ke repositori GitHub Anda lalu aktifkan <strong>Settings → Pages</strong>. Untuk dukungan <strong>100% offline</strong> di kelas tanpa internet, sertakan juga <code class="font-black text-[#0B4F71]">manifest.json</code> dan <code class="font-black text-[#0B4F71]">sw.js</code> di folder yang sama.
+          </p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-          <button
-            id="btnDownloadHtml"
-            type="button"
-            class="duo-btn duo-btn-green py-2.5 px-3 font-black text-xs flex items-center justify-center gap-1.5"
-          >
-            <span>⬇ Unduh index.html</span>
-          </button>
-          <button
-            id="btnDownloadManifest"
-            type="button"
-            class="duo-btn duo-btn-white py-2.5 px-3 font-black text-xs text-[#1899D6] flex items-center justify-center gap-1.5"
-          >
-            <span>⬇ manifest.json</span>
-          </button>
-          <button
-            id="btnDownloadSw"
-            type="button"
-            class="duo-btn duo-btn-white py-2.5 px-3 font-black text-xs text-[#3C3C3C] flex items-center justify-center gap-1.5"
-          >
-            <span>⬇ sw.js (Offline)</span>
-          </button>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button
+              id="btnDownloadHtml"
+              type="button"
+              class="duo-btn duo-btn-green py-2.5 px-3 font-black text-xs flex items-center justify-center gap-1.5"
+            >
+              <span>⬇ index.html</span>
+            </button>
+            <button
+              id="btnDownloadManifest"
+              type="button"
+              class="duo-btn duo-btn-white py-2.5 px-3 font-black text-xs text-[#1899D6] flex items-center justify-center gap-1.5"
+            >
+              <span>⬇ manifest.json</span>
+            </button>
+            <button
+              id="btnDownloadSw"
+              type="button"
+              class="duo-btn duo-btn-white py-2.5 px-3 font-black text-xs text-[#3C3C3C] flex items-center justify-center gap-1.5"
+            >
+              <span>⬇ sw.js (Offline)</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1027,20 +1090,68 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- LOGIKA PERMAINAN, MESIN AUDIO PENTATONIK & RENDER MASKOT CANVAS       -->
+  <!-- LOGIKA PERMAINAN, MUSIK LATAR BGM + SFX WEB AUDIO & CANVAS ARENA      -->
   <!-- ===================================================================== -->
   <script>
     /**
      * =========================================================================
-     * 1. MESIN AUDIO SINTETIS CERIA BERGAYA DUOLINGO (WEB AUDIO API)
+     * 1. MESIN MUSIK LATAR (BGM) & EFEK SUARA (SFX) PROSEDURAL WEB AUDIO API
      * =========================================================================
+     * - 100% sintetis Web Audio API (tanpa file MP3 eksternal, jalan offline).
+     * - Kontrol terpisah antara BGM (Musik Latar) dan SFX (Efek Suara).
+     * - 3 dinamika musik otomatis:
+     *   1) 'lobby' (112 BPM): Melodi kalimba/marimba C-G Major lembut.
+     *   2) 'match' (126 BPM): Ritme ceria penuh semangat dengan bass & arpeggio.
+     *   3) 'tense' (138 BPM): Tempo naik saat mendekati garis menang / 10d akhir.
      */
     const DuoAudio = (() => {
       let audioCtx = null;
-      let muted = false;
+      let bgmEnabled = true;
+      let sfxEnabled = true;
 
-      // Skala pentatonik mayor C5..C6 untuk nada naik setiap streak
+      let bgmMode = 'lobby'; // 'lobby' | 'match' | 'tense' | 'stopped'
+      let schedulerTimer = null;
+      let currentStep = 0;
+      let nextNoteTime = 0;
+
+      // Skala pentatonik mayor C5..D6 untuk nada naik setiap streak
       const PENTATONIC_SCALE = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50, 1174.66];
+
+      // Melodi Lobi (32 langkah eighth-note = 4 bar @ 112 BPM, kalimba lembut)
+      const LOBBY_MELODY = [
+        523.25, 0, 659.25, 587.33,   523.25, 0, 392.00, 0,
+        440.00, 0, 523.25, 493.88,   392.00, 0, 0, 0,
+        349.23, 0, 440.00, 523.25,   587.33, 0, 523.25, 440.00,
+        392.00, 440.00, 493.88, 587.33, 523.25, 0, 0, 0
+      ];
+      const LOBBY_BASS = [
+        130.81, 0, 0, 0,   196.00, 0, 0, 0,
+        110.00, 0, 0, 0,   196.00, 0, 0, 0,
+        174.61, 0, 0, 0,   146.83, 0, 0, 0,
+        196.00, 0, 0, 0,   130.81, 0, 0, 0
+      ];
+
+      // Melodi Pertandingan Ceria (32 langkah eighth-note = 4 bar @ 126 BPM)
+      const MATCH_MELODY = [
+        523.25, 659.25, 783.99, 659.25,  880.00, 783.99, 659.25, 523.25,
+        587.33, 659.25, 783.99, 880.00,  783.99, 0, 587.33, 0,
+        659.25, 783.99, 880.00, 1046.50, 880.00, 783.99, 659.25, 587.33,
+        523.25, 587.33, 659.25, 783.99,  1046.50, 0, 783.99, 0
+      ];
+      const MATCH_BASS = [
+        130.81, 0, 196.00, 0,  130.81, 0, 196.00, 0,
+        146.83, 0, 220.00, 0,  196.00, 0, 246.94, 0,
+        174.61, 0, 220.00, 0,  174.61, 0, 220.00, 0,
+        196.00, 0, 246.94, 0,  130.81, 196.00, 130.81, 0
+      ];
+
+      // Melodi Tegang / Sudden Death (32 langkah eighth-note @ 138 BPM)
+      const TENSE_MELODY = [
+        659.25, 783.99, 1046.50, 783.99,  880.00, 1046.50, 1174.66, 1046.50,
+        783.99, 880.00, 1046.50, 1174.66, 1318.51, 1174.66, 1046.50, 880.00,
+        698.46, 880.00, 1046.50, 880.00,  783.99, 987.77, 1174.66, 987.77,
+        1046.50, 783.99, 1046.50, 1318.51, 1567.98, 0, 1318.51, 0
+      ];
 
       function initContext() {
         if (!audioCtx) {
@@ -1052,8 +1163,113 @@
         }
       }
 
-      function playNote(freq, wave, duration, delay = 0, volume = 0.16, endFreq = null) {
-        if (muted) return;
+      /**
+       * Sintesis instrumen Marimba/Kalimba hangat dengan lowpass filter
+       */
+      function playMarimba(freq, time, duration, volume, isBass = false) {
+        if (!audioCtx || freq <= 0) return;
+
+        const oscMain = audioCtx.createOscillator();
+        const oscHarmonic = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        oscMain.type = isBass ? 'triangle' : 'sine';
+        oscMain.frequency.setValueAtTime(freq, time);
+
+        // Harmonik lembut untuk karakter kayu marimba
+        oscHarmonic.type = 'sine';
+        oscHarmonic.frequency.setValueAtTime(isBass ? freq * 2 : freq * 4, time);
+
+        const harmGain = audioCtx.createGain();
+        harmGain.gain.setValueAtTime(isBass ? 0.18 : 0.08, time);
+        harmGain.gain.exponentialRampToValueAtTime(0.001, time + duration * 0.35);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(isBass ? 680 : 2400, time);
+
+        gain.gain.setValueAtTime(0.0005, time);
+        gain.gain.linearRampToValueAtTime(volume, time + 0.009);
+        gain.gain.exponentialRampToValueAtTime(0.0005, time + duration);
+
+        oscMain.connect(filter);
+        oscHarmonic.connect(harmGain);
+        harmGain.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        oscMain.start(time);
+        oscHarmonic.start(time);
+        oscMain.stop(time + duration + 0.02);
+        oscHarmonic.stop(time + duration + 0.02);
+      }
+
+      /**
+       * Ketukan perkusi shaker ringan untuk musik pertandingan
+       */
+      function playLightTick(time, volume) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1400, time);
+        osc.frequency.exponentialRampToValueAtTime(420, time + 0.03);
+
+        gain.gain.setValueAtTime(0.0005, time);
+        gain.gain.linearRampToValueAtTime(volume, time + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0005, time + 0.035);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(time);
+        osc.stop(time + 0.04);
+      }
+
+      function scheduleStep(stepIndex, time) {
+        if (!bgmEnabled || bgmMode === 'stopped' || document.hidden) return;
+
+        if (bgmMode === 'lobby') {
+          const mel = LOBBY_MELODY[stepIndex % LOBBY_MELODY.length];
+          const bass = LOBBY_BASS[stepIndex % LOBBY_BASS.length];
+          if (mel > 0) playMarimba(mel, time, 0.28, 0.048, false);
+          if (bass > 0) playMarimba(bass, time, 0.36, 0.042, true);
+        } else if (bgmMode === 'match') {
+          const mel = MATCH_MELODY[stepIndex % MATCH_MELODY.length];
+          const bass = MATCH_BASS[stepIndex % MATCH_BASS.length];
+          if (mel > 0) playMarimba(mel, time, 0.23, 0.058, false);
+          if (bass > 0) playMarimba(bass, time, 0.25, 0.055, true);
+          if (stepIndex % 2 === 1) playLightTick(time, 0.016);
+        } else if (bgmMode === 'tense') {
+          const mel = TENSE_MELODY[stepIndex % TENSE_MELODY.length];
+          const bass = MATCH_BASS[stepIndex % MATCH_BASS.length];
+          if (mel > 0) playMarimba(mel, time, 0.20, 0.062, false);
+          if (bass > 0) playMarimba(bass * 1.122, time, 0.22, 0.058, true);
+          playLightTick(time, stepIndex % 2 === 0 ? 0.022 : 0.014);
+        }
+      }
+
+      function runBgmScheduler() {
+        if (!bgmEnabled || bgmMode === 'stopped' || document.hidden) return;
+        if (!audioCtx || audioCtx.state !== 'running') return;
+
+        const bpm = bgmMode === 'lobby' ? 112 : bgmMode === 'match' ? 126 : 138;
+        const eighthSec = 60 / bpm / 2;
+
+        while (nextNoteTime < audioCtx.currentTime + 0.14) {
+          scheduleStep(currentStep, nextNoteTime);
+          nextNoteTime += eighthSec;
+          currentStep = (currentStep + 1) % 32;
+        }
+      }
+
+      function ensureSchedulerRunning() {
+        if (!schedulerTimer) {
+          schedulerTimer = setInterval(runBgmScheduler, 55);
+        }
+      }
+
+      function playSfxNote(freq, wave, duration, delay = 0, volume = 0.16, endFreq = null) {
+        if (!sfxEnabled) return;
         initContext();
         if (!audioCtx) return;
 
@@ -1078,46 +1294,82 @@
         osc.stop(t0 + duration + 0.02);
       }
 
+      // Buka kunci audio pada interaksi pertama pengguna (HP / Laptop)
+      const unlockHandler = () => {
+        initContext();
+        if (audioCtx && audioCtx.state === 'running' && bgmEnabled && bgmMode !== 'stopped') {
+          if (nextNoteTime < audioCtx.currentTime) {
+            nextNoteTime = audioCtx.currentTime + 0.05;
+          }
+          ensureSchedulerRunning();
+        }
+      };
+      window.addEventListener('pointerdown', unlockHandler, { passive: true });
+      window.addEventListener('keydown', unlockHandler, { passive: true });
+
+      // Jeda BGM otomatis saat tab browser disembunyikan
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && audioCtx && bgmEnabled && bgmMode !== 'stopped') {
+          nextNoteTime = audioCtx.currentTime + 0.06;
+        }
+      });
+
       return {
-        toggleMute() {
-          muted = !muted;
-          return muted;
+        setBgmMode(mode) {
+          if (bgmMode === mode) return;
+          bgmMode = mode;
+          currentStep = 0;
+          if (audioCtx) {
+            nextNoteTime = audioCtx.currentTime + 0.05;
+          }
+          ensureSchedulerRunning();
         },
-        isMuted() {
-          return muted;
+        toggleBgm() {
+          bgmEnabled = !bgmEnabled;
+          initContext();
+          if (bgmEnabled && audioCtx) {
+            nextNoteTime = audioCtx.currentTime + 0.05;
+            ensureSchedulerRunning();
+          }
+          return bgmEnabled;
+        },
+        isBgmEnabled() {
+          return bgmEnabled;
+        },
+        toggleSfx() {
+          sfxEnabled = !sfxEnabled;
+          initContext();
+          return sfxEnabled;
+        },
+        isSfxEnabled() {
+          return sfxEnabled;
         },
         tap() {
-          // Klik tombol taktil ringan
-          playNote(620, 'sine', 0.045, 0, 0.09);
+          playSfxNote(640, 'sine', 0.045, 0, 0.09);
         },
         correct(streakLevel = 1) {
-          // Nada pentatonik ceria yang menanjak sesuai streak siswa
           const idx = Math.min(streakLevel - 1, PENTATONIC_SCALE.length - 2);
           const root = PENTATONIC_SCALE[Math.max(0, idx)];
           const fifth = PENTATONIC_SCALE[Math.min(idx + 1, PENTATONIC_SCALE.length - 1)];
 
-          playNote(root, 'triangle', 0.13, 0.00, 0.20);
-          playNote(fifth, 'triangle', 0.22, 0.08, 0.22);
-
-          // Efek desiran tarikan tali
-          playNote(170, 'sine', 0.16, 0.02, 0.12, 95);
+          playSfxNote(root, 'triangle', 0.13, 0.00, 0.20);
+          playSfxNote(fifth, 'triangle', 0.22, 0.08, 0.22);
+          playSfxNote(175, 'sine', 0.16, 0.02, 0.12, 95);
         },
         streakBoost() {
-          // Kilau ekstra saat mencapai kelipatan 3x streak!
-          playNote(783.99, 'triangle', 0.11, 0.06, 0.18);
-          playNote(1046.50, 'triangle', 0.14, 0.14, 0.20);
-          playNote(1318.51, 'sine', 0.26, 0.22, 0.18);
+          playSfxNote(783.99, 'triangle', 0.11, 0.06, 0.18);
+          playSfxNote(1046.50, 'triangle', 0.14, 0.14, 0.20);
+          playSfxNote(1318.51, 'sine', 0.26, 0.22, 0.18);
         },
         wrong() {
-          // Suara marimba rendah lembut (ramah anak, tidak mengagetkan)
-          playNote(196.00, 'sine', 0.14, 0.00, 0.18, 175);
-          playNote(146.83, 'sine', 0.24, 0.13, 0.18, 130);
+          playSfxNote(196.00, 'sine', 0.14, 0.00, 0.18, 175);
+          playSfxNote(146.83, 'sine', 0.24, 0.13, 0.18, 130);
         },
         tick() {
-          playNote(880, 'sine', 0.06, 0, 0.10);
+          playSfxNote(880, 'sine', 0.06, 0, 0.10);
         },
         victory() {
-          // Fanfare kemenangan Duolingo-style
+          this.setBgmMode('stopped');
           const melody = [
             { f: 523.25, d: 0.00, l: 0.13 },
             { f: 659.25, d: 0.12, l: 0.13 },
@@ -1126,7 +1378,7 @@
             { f: 880.00, d: 0.72, l: 0.14 },
             { f: 1046.50, d: 0.88, l: 0.50 }
           ];
-          melody.forEach(m => playNote(m.f, 'triangle', m.l, m.d, 0.22));
+          melody.forEach(m => playSfxNote(m.f, 'triangle', m.l, m.d, 0.22));
         }
       };
     })();
@@ -1139,22 +1391,21 @@
     const gameConfig = {
       redName: 'Tim Merah',
       blueName: 'Tim Biru',
-      difficulty: 'pemula',          // 'pemula' | 'menengah' | 'mahir'
+      difficulty: 'mudah',              // 'mudah' | 'sedang' | 'sulit'
       operations: ['tambah', 'kurang'], // Array kombinasi operasi aktif
-      controlMode: 'keypad',         // 'keypad' | 'pilgan'
-      targetSteps: 7,                // 5 | 7 | 10
-      timeLimit: 0                   // 0 | 60 | 90
+      controlMode: 'keypad',            // 'keypad' | 'pilgan'
+      targetSteps: 7,                   // 5 | 7 | 10
+      timeLimit: 0                      // 0 | 60 | 90
     };
 
     const gameState = {
       active: false,
-      ropeSteps: 0,       // Negatif = Merah unggul (-targetSteps menang), Positif = Biru unggul (+targetSteps menang)
-      springPos: 0,       // Posisi tali hasil interpolasi pegas
+      ropeSteps: 0,
+      springPos: 0,
       springVel: 0,
       timeLeft: 0,
       timerHandle: null,
 
-      // Animasi maskot & efek partikel arena
       redPullAnim: 0,
       bluePullAnim: 0,
       particles: [],
@@ -1165,6 +1416,7 @@
           typed: '',
           question: null,
           qStartMs: 0,
+          pulls: 0,
           correct: 0,
           wrong: 0,
           streak: 0,
@@ -1177,6 +1429,7 @@
           typed: '',
           question: null,
           qStartMs: 0,
+          pulls: 0,
           correct: 0,
           wrong: 0,
           streak: 0,
@@ -1190,7 +1443,7 @@
 
     /**
      * =========================================================================
-     * 3. GENERATOR SOAL MATEMATIKA (PEMULA, MENENGAH, MAHIR)
+     * 3. GENERATOR SOAL MATEMATIKA (MUDAH, SEDANG, SULIT)
      * =========================================================================
      */
     function randRange(min, max) {
@@ -1211,8 +1464,7 @@
       let prompt = '';
       let answer = 0;
 
-      if (difficulty === 'pemula') {
-        // Pemula (SD 1–3): angka ramah 1–20
+      if (difficulty === 'mudah') {
         if (op === 'tambah') {
           const a = randRange(1, 14);
           const b = randRange(1, 20 - a);
@@ -1234,8 +1486,7 @@
           const a = b * answer;
           prompt = `${a} ÷ ${b} = ?`;
         }
-      } else if (difficulty === 'menengah') {
-        // Menengah (SD 4–6): puluhan & tabel perkalian/pembagian 12x12
+      } else if (difficulty === 'sedang') {
         if (op === 'tambah') {
           const a = randRange(14, 65);
           const b = randRange(12, 55);
@@ -1258,7 +1509,6 @@
           prompt = `${a} ÷ ${b} = ?`;
         }
       } else {
-        // Mahir (SMP): bilangan bulat negatif, kuadrat, & kombinasi
         const useHardTwist = Math.random() < 0.3 && allowedOps.length >= 2;
         if (useHardTwist) {
           const base = randRange(4, 11);
@@ -1307,7 +1557,7 @@
       const pool = new Set([correct]);
       const deltas = [-10, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 10];
 
-      if (difficulty === 'mahir' && correct !== 0) {
+      if (difficulty === 'sulit' && correct !== 0) {
         pool.add(-correct);
       }
 
@@ -1315,7 +1565,7 @@
       while (pool.size < 4 && tries < 60) {
         tries++;
         const cand = correct + deltas[randRange(0, deltas.length - 1)];
-        if (difficulty === 'pemula' && cand < 0) continue;
+        if (difficulty === 'mudah' && cand < 0) continue;
         pool.add(cand);
       }
 
@@ -1330,10 +1580,75 @@
 
     /**
      * =========================================================================
-     * 4. LOGIKA LAYAR PENGATURAN (SETUP SCREEN INTERACTIONS)
+     * 4. SINKRONISASI KONTROL AUDIO (BGM & SFX) & INTERAKSI SETUP
      * =========================================================================
      */
+    function syncAudioButtonsUI() {
+      const bgmOn = DuoAudio.isBgmEnabled();
+      const sfxOn = DuoAudio.isSfxEnabled();
+
+      // Tombol BGM Setup & Game
+      const btnSetupBgm = document.getElementById('btnToggleBgm');
+      const btnGameBgm = document.getElementById('btnGameBgm');
+      const waveBars = document.getElementById('bgmWaveBars');
+
+      if (bgmOn) {
+        btnSetupBgm.className = 'duo-btn duo-card-selected-blue h-10 w-10 md:w-auto md:px-3 flex items-center justify-center gap-1.5 font-extrabold text-xs shrink-0';
+        btnGameBgm.className = 'duo-btn duo-card-selected-blue h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center gap-0.5';
+        waveBars.classList.remove('opacity-30');
+        waveBars.querySelectorAll('.eq-bar').forEach(b => (b.style.animationPlayState = 'running'));
+      } else {
+        btnSetupBgm.className = 'duo-btn duo-btn-ghost h-10 w-10 md:w-auto md:px-3 flex items-center justify-center gap-1.5 font-extrabold text-xs shrink-0';
+        btnGameBgm.className = 'duo-btn duo-btn-ghost h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center gap-0.5';
+        waveBars.classList.add('opacity-30');
+        waveBars.querySelectorAll('.eq-bar').forEach(b => (b.style.animationPlayState = 'paused'));
+      }
+
+      // Tombol SFX Setup & Game
+      const speakerOnSvg = `
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+      `;
+      const speakerOffSvg = `
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+        <line x1="23" y1="9" x2="17" y2="15"></line>
+        <line x1="17" y1="9" x2="23" y2="15"></line>
+      `;
+
+      const btnSetupSfx = document.getElementById('btnToggleSfx');
+      const btnGameSfx = document.getElementById('btnGameSfx');
+      document.getElementById('sfxIconSetup').innerHTML = sfxOn ? speakerOnSvg : speakerOffSvg;
+      document.getElementById('sfxIconGame').innerHTML = sfxOn ? speakerOnSvg : speakerOffSvg;
+
+      if (sfxOn) {
+        btnSetupSfx.className = 'duo-btn duo-btn-white h-10 w-10 lg:w-auto lg:px-3 flex items-center justify-center gap-1.5 font-extrabold text-xs text-[#1CB0F6] shrink-0';
+        btnGameSfx.className = 'duo-btn duo-btn-white h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center text-[#1CB0F6]';
+      } else {
+        btnSetupSfx.className = 'duo-btn duo-btn-ghost h-10 w-10 lg:w-auto lg:px-3 flex items-center justify-center gap-1.5 font-extrabold text-xs shrink-0';
+        btnGameSfx.className = 'duo-btn duo-btn-ghost h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center';
+      }
+    }
+
     function setupScreenEvents() {
+      // Toggle BGM (Setup & Game)
+      const handleBgmClick = () => {
+        DuoAudio.toggleBgm();
+        DuoAudio.tap();
+        syncAudioButtonsUI();
+      };
+      document.getElementById('btnToggleBgm').addEventListener('click', handleBgmClick);
+      document.getElementById('btnGameBgm').addEventListener('click', handleBgmClick);
+
+      // Toggle SFX (Setup & Game)
+      const handleSfxClick = () => {
+        const isNowOn = DuoAudio.toggleSfx();
+        if (isNowOn) DuoAudio.tap();
+        syncAudioButtonsUI();
+      };
+      document.getElementById('btnToggleSfx').addEventListener('click', handleSfxClick);
+      document.getElementById('btnGameSfx').addEventListener('click', handleSfxClick);
+
       // 1. Tingkat Kesulitan
       document.querySelectorAll('#difficultyGroup .diff-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1341,24 +1656,40 @@
           gameConfig.difficulty = btn.dataset.value;
 
           document.querySelectorAll('#difficultyGroup .diff-btn').forEach(b => {
-            b.className = 'diff-btn duo-btn duo-btn-white p-4 text-left';
+            b.className = 'diff-btn duo-btn duo-btn-white p-3.5 sm:p-4 text-left';
           });
 
-          if (gameConfig.difficulty === 'pemula') {
-            btn.className = 'diff-btn duo-btn duo-card-selected-green p-4 text-left';
-          } else if (gameConfig.difficulty === 'menengah') {
-            btn.className = 'diff-btn duo-btn duo-card-selected-blue p-4 text-left';
+          if (gameConfig.difficulty === 'mudah') {
+            btn.className = 'diff-btn duo-btn duo-card-selected-green p-3.5 sm:p-4 text-left';
+          } else if (gameConfig.difficulty === 'sedang') {
+            btn.className = 'diff-btn duo-btn duo-card-selected-blue p-3.5 sm:p-4 text-left';
           } else {
-            btn.className = 'diff-btn duo-btn duo-card-selected-purple p-4 text-left';
+            btn.className = 'diff-btn duo-btn duo-card-selected-purple p-3.5 sm:p-4 text-left';
           }
         });
       });
 
-      // 2. Operasi Matematika (Multi-select toggle)
-      const updateOpHint = () => {
-        const count = gameConfig.operations.length;
+      // 2. Operasi Matematika (+, −, ×, ÷, dan tombol cepat Campuran)
+      const syncOperationsUI = () => {
+        const allFour = ['tambah', 'kurang', 'kali', 'bagi'];
+        const isAllSelected = allFour.every(op => gameConfig.operations.includes(op));
+
+        document.querySelectorAll('#operationsGroup .op-toggle-btn').forEach(btn => {
+          const active = gameConfig.operations.includes(btn.dataset.op);
+          btn.className = active
+            ? 'op-toggle-btn duo-btn duo-card-selected-blue p-3 flex flex-col items-center justify-center gap-1'
+            : 'op-toggle-btn duo-btn duo-btn-white p-3 flex flex-col items-center justify-center gap-1';
+        });
+
+        const btnCampuran = document.getElementById('btnOpCampuran');
+        btnCampuran.className = isAllSelected
+          ? 'col-span-2 sm:col-span-1 duo-btn duo-card-selected-purple p-3 flex flex-col items-center justify-center gap-1'
+          : 'col-span-2 sm:col-span-1 duo-btn duo-btn-white p-3 flex flex-col items-center justify-center gap-1';
+
         const badge = document.getElementById('opHintBadge');
-        badge.textContent = count === 1 ? '1 Operasi Aktif' : `${count} Operasi Aktif`;
+        badge.textContent = isAllSelected
+          ? 'Campuran (Semua Aktif)'
+          : `${gameConfig.operations.length} Operasi Aktif`;
       };
 
       document.querySelectorAll('#operationsGroup .op-toggle-btn').forEach(btn => {
@@ -1367,7 +1698,6 @@
           const idx = gameConfig.operations.indexOf(op);
 
           if (idx !== -1) {
-            // Minimal harus ada 1 operasi terpilih
             if (gameConfig.operations.length === 1) {
               DuoAudio.wrong();
               btn.classList.remove('animate-duo-shake');
@@ -1377,80 +1707,54 @@
             }
             DuoAudio.tap();
             gameConfig.operations.splice(idx, 1);
-            btn.className = 'op-toggle-btn duo-btn duo-btn-white p-3.5 flex flex-col items-center justify-center gap-1';
           } else {
             DuoAudio.tap();
             gameConfig.operations.push(op);
-            btn.className = 'op-toggle-btn duo-btn duo-card-selected-blue p-3.5 flex flex-col items-center justify-center gap-1';
           }
-          updateOpHint();
+          syncOperationsUI();
         });
       });
 
-      // 3. Mode Kontrol
+      document.getElementById('btnOpCampuran').addEventListener('click', () => {
+        DuoAudio.tap();
+        gameConfig.operations = ['tambah', 'kurang', 'kali', 'bagi'];
+        syncOperationsUI();
+      });
+
+      // 3. Mode Jawab
       document.querySelectorAll('#modeGroup .mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           DuoAudio.tap();
           gameConfig.controlMode = btn.dataset.value;
           document.querySelectorAll('#modeGroup .mode-btn').forEach(b => {
-            b.className = 'mode-btn duo-btn duo-btn-white p-4 text-left flex items-center gap-3.5';
+            b.className = 'mode-btn duo-btn duo-btn-white p-3.5 sm:p-4 text-left flex items-center gap-3.5';
           });
-          btn.className = 'mode-btn duo-btn duo-card-selected-blue p-4 text-left flex items-center gap-3.5';
+          btn.className = 'mode-btn duo-btn duo-card-selected-blue p-3.5 sm:p-4 text-left flex items-center gap-3.5';
         });
       });
 
-      // 4. Target Tarikan
+      // 4. Target Menang
       document.querySelectorAll('#targetGroup .target-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           DuoAudio.tap();
           gameConfig.targetSteps = parseInt(btn.dataset.value, 10);
           document.querySelectorAll('#targetGroup .target-btn').forEach(b => {
-            b.className = 'target-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-sm';
+            b.className = 'target-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs sm:text-sm';
           });
-          btn.className = 'target-btn duo-btn duo-card-selected-gold py-3 px-2 font-extrabold text-sm';
+          btn.className = 'target-btn duo-btn duo-card-selected-gold py-3 px-2 font-extrabold text-xs sm:text-sm';
         });
       });
 
-      // 5. Batas Waktu
+      // 5. Opsi Timer
       document.querySelectorAll('#timerGroup .timer-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           DuoAudio.tap();
           gameConfig.timeLimit = parseInt(btn.dataset.value, 10);
           document.querySelectorAll('#timerGroup .timer-btn').forEach(b => {
-            b.className = 'timer-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs';
+            b.className = 'timer-btn duo-btn duo-btn-white py-3 px-2 font-extrabold text-xs sm:text-sm';
           });
-          btn.className = 'timer-btn duo-btn duo-card-selected-green py-3 px-2 font-extrabold text-xs';
+          btn.className = 'timer-btn duo-btn duo-card-selected-green py-3 px-2 font-extrabold text-xs sm:text-sm';
         });
-      });
-
-      // Tombol Sound di Setup & Game
-      const syncAudioIcons = () => {
-        const isMuted = DuoAudio.isMuted();
-        const speakerOn = `
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-        `;
-        const speakerOff = `
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-          <line x1="23" y1="9" x2="17" y2="15"></line>
-          <line x1="17" y1="9" x2="23" y2="15"></line>
-        `;
-        document.getElementById('setupSoundIconSvg').innerHTML = isMuted ? speakerOff : speakerOn;
-        document.getElementById('gameSoundIconSvg').innerHTML = isMuted ? speakerOff : speakerOn;
-        document.getElementById('setupSoundLabel').textContent = isMuted ? 'Suara Mati' : 'Suara Aktif';
-      };
-
-      document.getElementById('btnSetupSound').addEventListener('click', () => {
-        DuoAudio.toggleMute();
-        syncAudioIcons();
-        if (!DuoAudio.isMuted()) DuoAudio.tap();
-      });
-
-      document.getElementById('btnGameSound').addEventListener('click', () => {
-        DuoAudio.toggleMute();
-        syncAudioIcons();
-        if (!DuoAudio.isMuted()) DuoAudio.tap();
       });
 
       // Mulai Pertandingan
@@ -1505,6 +1809,7 @@
         const p = gameState.players[side];
         if (p.lockTimeout) clearTimeout(p.lockTimeout);
         p.typed = '';
+        p.pulls = 0;
         p.correct = 0;
         p.wrong = 0;
         p.streak = 0;
@@ -1512,6 +1817,9 @@
         p.totalTimeMs = 0;
         p.locked = false;
       });
+
+      // Aktifkan BGM Pertandingan Ceria (126 BPM)
+      DuoAudio.setBgmMode('match');
 
       // Perbarui label HUD
       const symbolMap = { tambah: '+', kurang: '−', kali: '×', bagi: '÷' };
@@ -1530,7 +1838,6 @@
 
       updateTopGaugeHUD();
 
-      // Atur kotak tampilan jawaban (Keypad vs Pilihan Ganda)
       const barRed = document.getElementById('answerBarRed');
       const barBlue = document.getElementById('answerBarBlue');
       if (gameConfig.controlMode === 'keypad') {
@@ -1569,6 +1876,7 @@
 
           if (gameState.timeLeft <= 10 && gameState.timeLeft > 0) {
             DuoAudio.tick();
+            DuoAudio.setBgmMode('tense');
             timerVal.className = 'text-[#FF4B4B] animate-pulse';
           }
 
@@ -1589,6 +1897,7 @@
         const p = gameState.players[side];
         if (p.lockTimeout) clearTimeout(p.lockTimeout);
       });
+      DuoAudio.setBgmMode('lobby');
       document.getElementById('gameScreen').classList.add('hidden');
       document.getElementById('setupScreen').classList.remove('hidden');
     }
@@ -1604,45 +1913,43 @@
 
       if (gameConfig.controlMode === 'keypad') {
         const grid = document.createElement('div');
-        grid.className = 'flex-1 grid grid-cols-3 grid-rows-4 gap-1.5 sm:gap-2.5 min-h-0';
+        grid.className = 'flex-1 grid grid-cols-3 grid-rows-4 gap-1 sm:gap-2.5 min-h-0';
 
-        // Susunan keypad ergonomis (1-9, Hapus/Negatif, 0, Cek/Kirim)
-        // Jika tingkat Mahir (ada bilangan negatif), tombol kiri bawah bisa toggle tanda ± dan Hapus di atas atau baris rapi
-        const isHard = gameConfig.difficulty === 'mahir';
+        const isHard = gameConfig.difficulty === 'sulit';
         const buttons = isHard
           ? [
-              { label: '7', code: '7', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '8', code: '8', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '9', code: '9', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '4', code: '4', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '5', code: '5', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '6', code: '6', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '1', code: '1', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '2', code: '2', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '3', code: '3', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '− / ⌫', code: 'NEG_OR_BACK', style: 'duo-btn-ghost text-base sm:text-lg font-black' },
-              { label: '0', code: '0', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: 'CEK ✓', code: 'SUBMIT', style: 'duo-btn-green text-lg sm:text-xl font-black tracking-wide' }
+              { label: '7', code: '7', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '8', code: '8', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '9', code: '9', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '4', code: '4', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '5', code: '5', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '6', code: '6', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '1', code: '1', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '2', code: '2', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '3', code: '3', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '− / ⌫', code: 'NEG_OR_BACK', style: 'duo-btn-ghost text-sm sm:text-lg font-black' },
+              { label: '0', code: '0', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: 'CEK ✓', code: 'SUBMIT', style: 'duo-btn-green text-sm sm:text-xl font-black tracking-wide' }
             ]
           : [
-              { label: '1', code: '1', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '2', code: '2', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '3', code: '3', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '4', code: '4', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '5', code: '5', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '6', code: '6', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '7', code: '7', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '8', code: '8', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '9', code: '9', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: '⌫', code: 'BACK', style: 'duo-btn-ghost text-xl sm:text-2xl font-black' },
-              { label: '0', code: '0', style: 'duo-btn-white text-xl sm:text-2xl lg:text-3xl font-black' },
-              { label: 'CEK ✓', code: 'SUBMIT', style: 'duo-btn-green text-lg sm:text-xl font-black tracking-wide' }
+              { label: '1', code: '1', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '2', code: '2', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '3', code: '3', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '4', code: '4', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '5', code: '5', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '6', code: '6', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '7', code: '7', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '8', code: '8', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '9', code: '9', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: '⌫', code: 'BACK', style: 'duo-btn-ghost text-lg sm:text-2xl font-black' },
+              { label: '0', code: '0', style: 'duo-btn-white text-lg sm:text-2xl lg:text-3xl font-black' },
+              { label: 'CEK ✓', code: 'SUBMIT', style: 'duo-btn-green text-sm sm:text-xl font-black tracking-wide' }
             ];
 
         buttons.forEach(item => {
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = `duo-btn ${item.style} flex items-center justify-center`;
+          btn.className = `duo-btn ${item.style} flex items-center justify-center min-h-[38px]`;
           btn.textContent = item.label;
 
           btn.addEventListener('pointerdown', e => {
@@ -1655,10 +1962,9 @@
 
         mount.appendChild(grid);
       } else {
-        // Mode Pilihan Ganda: 4 kartu opsi besar 2x2 dengan label pintasan keyboard
         const grid = document.createElement('div');
         grid.id = side === 'red' ? 'choiceGridRed' : 'choiceGridBlue';
-        grid.className = 'flex-1 grid grid-cols-2 grid-rows-2 gap-2.5 sm:gap-3.5 min-h-0';
+        grid.className = 'flex-1 grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3.5 min-h-0';
 
         const keyHints = side === 'red' ? ['Q', 'W', 'E', 'R'] : ['U', 'I', 'O', 'P'];
         const badgeBg = side === 'red' ? 'bg-[#FFDFE0] text-[#EA2B2B]' : 'bg-[#DDF4FF] text-[#1899D6]';
@@ -1668,7 +1974,7 @@
           btn.type = 'button';
           btn.className = 'duo-btn duo-btn-white relative flex items-center justify-center p-2';
           btn.innerHTML = `
-            <span class="absolute top-2 left-2.5 px-2 py-0.5 rounded-lg text-xs font-black ${badgeBg}">
+            <span class="hidden sm:inline-block absolute top-2 left-2.5 px-2 py-0.5 rounded-lg text-xs font-black ${badgeBg}">
               ${keyHints[i]}
             </span>
             <span class="choice-val font-black text-2xl sm:text-3xl lg:text-4xl text-[#3C3C3C]">-</span>
@@ -1720,7 +2026,7 @@
 
     /**
      * =========================================================================
-     * 7. PENANGANAN INPUT, STREAK BONUS (+0.5 TARIKAN), & COOLDOWN 1.5 DETIK
+     * 7. PENANGANAN INPUT, STREAK BONUS (+1.5 TARIKAN), & COOLDOWN 1.5 DETIK
      * =========================================================================
      */
     function onKeypadInput(side, code) {
@@ -1734,7 +2040,6 @@
         refreshTypedDisplay(side);
       } else if (code === 'NEG_OR_BACK') {
         DuoAudio.tap();
-        // Jika kosong, pasang tanda minus '-'; jika sudah ada karakter, hapus 1 karakter
         if (p.typed.length === 0) {
           p.typed = '-';
         } else {
@@ -1751,7 +2056,6 @@
         }
         verifyAnswer(side, parseInt(p.typed, 10));
       } else {
-        // Digit 0-9
         if (p.typed.replace('-', '').length >= 5) return;
         DuoAudio.tap();
         if (p.typed === '0') p.typed = code;
@@ -1770,7 +2074,6 @@
       verifyAnswer(side, picked);
     }
 
-    // Dukungan Keyboard untuk Pilihan Ganda (Q/W/E/R & U/I/O/P)
     window.addEventListener('keydown', e => {
       if (!gameState.active || gameConfig.controlMode !== 'pilgan') return;
       const k = e.key.toUpperCase();
@@ -1790,23 +2093,22 @@
       const expected = p.question.answer;
 
       if (value === expected) {
-        // === JAWABAN BENAR ===
         const dt = performance.now() - p.qStartMs;
         p.totalTimeMs += dt;
         p.correct++;
         p.streak++;
         if (p.streak > p.maxStreak) p.maxStreak = p.streak;
 
-        // Setiap 3 jawaban benar berturut-turut memberi dorongan ekstra +0.5 tarikan!
+        // Setiap kelipatan 3 jawaban benar beruntun memberi dorongan +1.5 tarikan ekstra!
         const hasStreakBoost = p.streak > 0 && p.streak % 3 === 0;
         const pullPower = hasStreakBoost ? 1.5 : 1.0;
+        p.pulls += pullPower;
 
         DuoAudio.correct(p.streak);
         if (hasStreakBoost) {
           DuoAudio.streakBoost();
         }
 
-        // Perbarui Skor & Lencana Api Streak
         document.getElementById(side === 'red' ? 'scoreValRed' : 'scoreValBlue').textContent = p.correct;
         const badge = document.getElementById(side === 'red' ? 'streakBadgeRed' : 'streakBadgeBlue');
         const countEl = document.getElementById(side === 'red' ? 'streakCountRed' : 'streakCountBlue');
@@ -1818,14 +2120,12 @@
           badge.classList.add('hidden');
         }
 
-        // Umpan Balik Toast
         showToast(
           side,
-          hasStreakBoost ? '🔥 DORONGAN +1.5!' : 'Hebat! +1',
+          hasStreakBoost ? '🔥 +1.5!' : 'Hebat! +1',
           hasStreakBoost ? 'bg-[#FF9600] text-white' : 'bg-[#58CC02] text-white'
         );
 
-        // Gerakkan Posisi Tali
         if (side === 'red') {
           gameState.ropeSteps -= pullPower;
           gameState.springVel -= 0.34 * pullPower;
@@ -1838,9 +2138,15 @@
           emitArenaBurst('blue', hasStreakBoost);
         }
 
+        // Otomatis naikkan tempo BGM ke mode 'tense' (138 BPM) jika tali mendekati garis menang!
+        if (Math.abs(gameState.ropeSteps) >= gameConfig.targetSteps - 1.5) {
+          DuoAudio.setBgmMode('tense');
+        } else if (gameConfig.timeLimit === 0 || gameState.timeLeft > 10) {
+          DuoAudio.setBgmMode('match');
+        }
+
         updateTopGaugeHUD();
 
-        // Cek Garis Kemenangan
         if (Math.abs(gameState.ropeSteps) >= gameConfig.targetSteps) {
           gameState.ropeSteps = side === 'red' ? -gameConfig.targetSteps : gameConfig.targetSteps;
           concludeByLine(side);
@@ -1849,7 +2155,6 @@
 
         nextQuestion(side);
       } else {
-        // === JAWABAN SALAH (PENALTI 1,5 DETIK) ===
         p.wrong++;
         p.streak = 0;
         p.typed = '';
@@ -1871,7 +2176,7 @@
     function showToast(side, label, colorClasses) {
       const el = document.getElementById(side === 'red' ? 'toastRed' : 'toastBlue');
       el.textContent = label;
-      el.className = `px-2.5 py-1 rounded-xl font-black text-xs sm:text-sm transition-opacity duration-150 shrink-0 ${colorClasses}`;
+      el.className = `absolute right-0 top-0 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl font-black text-[11px] sm:text-sm pointer-events-none transition-opacity duration-150 shadow-xs ${colorClasses}`;
       el.style.opacity = '1';
       clearTimeout(el._timer);
       el._timer = setTimeout(() => {
@@ -1913,8 +2218,7 @@
       document.getElementById('hudRedDistance').textContent = `${fmt(redSteps)}/${target}`;
       document.getElementById('hudBlueDistance').textContent = `${fmt(blueSteps)}/${target}`;
 
-      // Persentase pengisian gauge tengah
-      const ratio = (gameState.ropeSteps / target) * 50; // -50 s.d. +50
+      const ratio = (gameState.ropeSteps / target) * 50;
       const redPct = Math.max(5, Math.min(95, 50 - ratio));
       const bluePct = 100 - redPct;
       document.getElementById('hudGaugeFillRed').style.width = `${redPct}%`;
@@ -1930,22 +2234,17 @@
       if (winner === 'red') {
         return `
           <svg viewBox="0 0 100 100" class="w-full h-full">
-            <!-- Mahkota Emas Bee Gold -->
             <polygon points="28,24 34,8 50,18 66,8 72,24" fill="#FFC800" stroke="#E5A400" stroke-width="3" stroke-linejoin="round"/>
             <circle cx="34" cy="8" r="3" fill="#FF4B4B"/>
             <circle cx="50" cy="15" r="3" fill="#1CB0F6"/>
             <circle cx="66" cy="8" r="3" fill="#58CC02"/>
-            <!-- Telinga Rubah -->
             <polygon points="22,42 18,18 40,30" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5" stroke-linejoin="round"/>
             <polygon points="78,42 82,18 60,30" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5" stroke-linejoin="round"/>
-            <!-- Kepala -->
             <ellipse cx="50" cy="56" rx="28" ry="24" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5"/>
             <path d="M23 56 C31 56, 39 62, 50 79 C32 79, 23 69, 23 56 Z" fill="#FFFFFF"/>
             <path d="M77 56 C69 56, 61 62, 50 79 C68 79, 77 69, 77 56 Z" fill="#FFFFFF"/>
-            <!-- Mata Bahagia ^ ^ -->
             <path d="M33 52 Q38 45 43 52" fill="none" stroke="#2B2B2B" stroke-width="3.2" stroke-linecap="round"/>
             <path d="M57 52 Q62 45 67 52" fill="none" stroke="#2B2B2B" stroke-width="3.2" stroke-linecap="round"/>
-            <!-- Hidung & Senyum Lebar -->
             <ellipse cx="50" cy="63" rx="4.5" ry="3.2" fill="#2B2B2B"/>
             <path d="M41 69 Q50 78 59 69 Z" fill="#2B2B2B"/>
           </svg>
@@ -1953,18 +2252,14 @@
       } else if (winner === 'blue') {
         return `
           <svg viewBox="0 0 100 100" class="w-full h-full">
-            <!-- Mahkota Emas Bee Gold -->
             <polygon points="28,24 34,8 50,18 66,8 72,24" fill="#FFC800" stroke="#E5A400" stroke-width="3" stroke-linejoin="round"/>
             <circle cx="34" cy="8" r="3" fill="#FF4B4B"/>
             <circle cx="50" cy="15" r="3" fill="#58CC02"/>
             <circle cx="66" cy="8" r="3" fill="#1CB0F6"/>
-            <!-- Telinga Beruang -->
             <circle cx="26" cy="34" r="11" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
             <circle cx="74" cy="34" r="11" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
-            <!-- Kepala -->
             <ellipse cx="50" cy="56" rx="28" ry="24" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
             <ellipse cx="50" cy="64" rx="14" ry="11" fill="#E0F2FE"/>
-            <!-- Mata Bahagia ^ ^ -->
             <path d="M33 51 Q38 44 43 51" fill="none" stroke="#2B2B2B" stroke-width="3.2" stroke-linecap="round"/>
             <path d="M57 51 Q62 44 67 51" fill="none" stroke="#2B2B2B" stroke-width="3.2" stroke-linecap="round"/>
             <ellipse cx="50" cy="60" rx="5" ry="3.5" fill="#0C4A6E"/>
@@ -1972,7 +2267,6 @@
           </svg>
         `;
       } else {
-        // Seri: Medali Bintang Emas
         return `
           <svg viewBox="0 0 100 100" class="w-full h-full">
             <circle cx="50" cy="52" r="34" fill="#FFC800" stroke="#E5A400" stroke-width="4"/>
@@ -2035,9 +2329,13 @@
 
       const r = gameState.players.red;
       const b = gameState.players.blue;
+      const fmtPull = n => (Number.isInteger(n) ? `${n} langkah` : `${n.toFixed(1)} langkah`);
 
       document.getElementById('statColRed').textContent = gameConfig.redName;
       document.getElementById('statColBlue').textContent = gameConfig.blueName;
+
+      document.getElementById('statPullRed').textContent = fmtPull(r.pulls);
+      document.getElementById('statPullBlue').textContent = fmtPull(b.pulls);
 
       document.getElementById('statBenarRed').textContent = r.correct;
       document.getElementById('statBenarBlue').textContent = b.correct;
@@ -2095,24 +2393,21 @@
       const maxSpan = canvasW * 0.25;
       const flagX = midX + (gameState.springPos / gameConfig.targetSteps) * maxSpan;
       const groundY = canvasH * 0.80;
-      const mascotX = side === 'red' ? flagX - Math.min(92, canvasW * 0.10) : flagX + Math.min(92, canvasW * 0.10);
+      const mascotX = side === 'red' ? flagX - Math.min(86, canvasW * 0.10) : flagX + Math.min(86, canvasW * 0.10);
 
-      // Partikel debu & bintang
       const count = isStreakBoost ? 18 : 10;
       for (let i = 0; i < count; i++) {
         gameState.particles.push({
-          x: mascotX + randRange(-25, 25),
-          y: groundY - randRange(4, 24),
+          x: mascotX + randRange(-24, 24),
+          y: groundY - randRange(4, 22),
           vx: (side === 'red' ? 1 : -1) * (Math.random() * 3 + 0.8),
           vy: -(Math.random() * 2.8 + 0.8),
           size: isStreakBoost ? randRange(5, 8) : randRange(3, 6),
           alpha: 1,
-          isStar: isStreakBoost && i % 2 === 0,
           color: isStreakBoost ? '#FFC800' : (side === 'red' ? '#FF9696' : '#84D8FF')
         });
       }
 
-      // Callout teks melayang
       gameState.callouts.push({
         x: mascotX,
         y: groundY - canvasH * 0.44,
@@ -2129,7 +2424,7 @@
 
       const t = nowMs * 0.001;
 
-      // Fisika Pegas (Spring-Damper Physics) untuk pergerakan tali
+      // Fisika Pegas (Spring-Damper Physics)
       const stiffness = 0.15;
       const damping = 0.72;
       const accel = (gameState.ropeSteps - gameState.springPos) * stiffness;
@@ -2144,15 +2439,14 @@
       const ctx = arenaCtx;
       ctx.clearRect(0, 0, w, h);
 
-      // 1. Langit Biru Cerah Duolingo (#DDF4FF)
+      // 1. Langit Biru Cerah Duolingo
       ctx.fillStyle = '#DDF4FF';
       ctx.fillRect(0, 0, w, h);
 
-      // Awan Vektor Bulat Melayang Perlahan
-      drawDuoCloud(ctx, ((t * 11) % (w + 220)) - 110, h * 0.24, 0.9);
-      drawDuoCloud(ctx, ((t * 7 + w * 0.52) % (w + 220)) - 110, h * 0.16, 0.68);
+      drawDuoCloud(ctx, ((t * 11) % (w + 220)) - 110, h * 0.24, 0.88);
+      drawDuoCloud(ctx, ((t * 7 + w * 0.52) % (w + 220)) - 110, h * 0.16, 0.66);
 
-      // 2. Perbukitan Hijau Berlapis (#A5ED6E & #78C800)
+      // 2. Perbukitan Hijau Berlapis
       ctx.fillStyle = '#A5ED6E';
       ctx.beginPath();
       ctx.moveTo(0, h * 0.80);
@@ -2169,22 +2463,20 @@
       ctx.closePath();
       ctx.fill();
 
-      // 3. Lintasan Rumput Rapi (#58CC02)
+      // 3. Lintasan Rumput Rapi
       const groundY = h * 0.80;
       ctx.fillStyle = '#58CC02';
       ctx.fillRect(0, groundY, w, h - groundY);
 
-      // Highlight bibir rumput
       ctx.fillStyle = '#78C800';
       ctx.fillRect(0, groundY, w, 5);
 
-      // 4. Garis Kapur Putih Tengah & Garis Batas Kemenangan Merah/Biru
+      // 4. Garis Tengah & Garis Batas Menang
       const midX = w / 2;
       const maxSpan = w * 0.25;
       const redWinX = midX - maxSpan;
       const blueWinX = midX + maxSpan;
 
-      // Titik-titik penanda langkah pada rumput
       for (let step = -gameConfig.targetSteps; step <= gameConfig.targetSteps; step++) {
         const sx = midX + (step / gameConfig.targetSteps) * maxSpan;
         ctx.fillStyle = step === 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.55)';
@@ -2193,11 +2485,8 @@
         ctx.fill();
       }
 
-      // Garis Kapur Putih di Tengah
       drawTrackMarker(ctx, midX, groundY, '#FFFFFF', 'TENGAH', false);
-      // Garis Kemenangan Merah (Kiri)
       drawTrackMarker(ctx, redWinX, groundY, '#FF4B4B', 'MENANG', true);
-      // Garis Kemenangan Biru (Kanan)
       drawTrackMarker(ctx, blueWinX, groundY, '#1CB0F6', 'MENANG', true);
 
       // 5. Posisi Tali & Maskot
@@ -2205,34 +2494,31 @@
       const flagX = midX + (clampedSpring / gameConfig.targetSteps) * maxSpan;
       const ropeY = groundY - h * 0.22;
 
-      const mascotOffset = Math.min(86, w * 0.095);
+      const mascotOffset = Math.min(84, w * 0.095);
       const foxX = flagX - mascotOffset;
       const bearX = flagX + mascotOffset;
 
-      // Gambar Tali Tambang Kepang
       drawBraidedRope(ctx, foxX - 24, bearX + 24, ropeY, t);
-
-      // Gambar Bendera Emas Bee Gold di Titik Tengah Tali
       drawGoldCenterFlag(ctx, flagX, ropeY, gameState.springVel);
 
-      // Tentukan ekspresi dinamis kedua maskot
-      const dangerRatio = gameState.ropeSteps / gameConfig.targetSteps; // -1 (Merah menang) s.d. +1 (Biru menang)
+      const dangerRatio = gameState.ropeSteps / gameConfig.targetSteps;
       let foxMood = 'neutral';
-      if (gameState.redPullAnim > 0.2) foxMood = 'pulling';
-      else if (dangerRatio >= 0.55) foxMood = 'panicked';
+      if (gameState.redPullAnim > 0.2 || dangerRatio <= -0.35) foxMood = 'pulling';
+      if (dangerRatio >= 0.55) foxMood = 'panicked';
 
       let bearMood = 'neutral';
-      if (gameState.bluePullAnim > 0.2) bearMood = 'pulling';
-      else if (dangerRatio <= -0.55) bearMood = 'panicked';
+      if (gameState.bluePullAnim > 0.2 || dangerRatio >= 0.35) bearMood = 'pulling';
+      if (dangerRatio <= -0.55) bearMood = 'panicked';
 
       const foxLean = -0.18 - gameState.redPullAnim * 0.24 + (gameState.springVel > 0.02 ? 0.14 : 0);
       const bearLean = 0.18 + gameState.bluePullAnim * 0.24 - (gameState.springVel < -0.02 ? 0.14 : 0);
 
-      // Gambar Maskot Rubah Merah (Kiri) & Maskot Beruang Biru (Kanan)
-      drawFoxMascot(ctx, foxX, groundY, ropeY, foxLean, foxMood, t);
-      drawBearMascot(ctx, bearX, groundY, ropeY, bearLean, bearMood, t);
+      const foxOnFire = gameState.players.red.streak >= 3;
+      const bearOnFire = gameState.players.blue.streak >= 3;
 
-      // 6. Partikel & Callout
+      drawFoxMascot(ctx, foxX, groundY, ropeY, foxLean, foxMood, foxOnFire, t);
+      drawBearMascot(ctx, bearX, groundY, ropeY, bearLean, bearMood, bearOnFire, t);
+
       renderParticles(ctx);
       renderCallouts(ctx);
     }
@@ -2253,12 +2539,11 @@
 
     function drawTrackMarker(ctx, x, groundY, color, text, hasFlag) {
       ctx.save();
-      // Garis vertikal tegas di lapangan
       ctx.strokeStyle = color;
       ctx.lineWidth = hasFlag ? 3 : 2.5;
       ctx.setLineDash(hasFlag ? [6, 4] : []);
       ctx.beginPath();
-      ctx.moveTo(x, groundY - 56);
+      ctx.moveTo(x, groundY - 54);
       ctx.lineTo(x, groundY + 18);
       ctx.stroke();
       ctx.setLineDash([]);
@@ -2267,13 +2552,13 @@
         const dir = x < canvasW / 2 ? -1 : 1;
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.roundRect(x, groundY - 56, 38 * dir, 16, 4);
+        ctx.roundRect(x, groundY - 54, 38 * dir, 16, 4);
         ctx.fill();
 
         ctx.fillStyle = '#FFFFFF';
         ctx.font = '900 9px "Nunito", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(text, x + 19 * dir, groundY - 45);
+        ctx.fillText(text, x + 19 * dir, groundY - 43);
       }
       ctx.restore();
     }
@@ -2282,7 +2567,6 @@
       const jitter = Math.sin(t * 32) * Math.min(2.2, Math.abs(gameState.springVel) * 7);
       ctx.save();
 
-      // Outline gelap tali
       ctx.strokeStyle = '#92400E';
       ctx.lineWidth = 11;
       ctx.lineCap = 'round';
@@ -2291,7 +2575,6 @@
       ctx.lineTo(x2, y + jitter);
       ctx.stroke();
 
-      // Inti tali emas-cokelat cerah
       ctx.strokeStyle = '#F59E0B';
       ctx.lineWidth = 6.5;
       ctx.beginPath();
@@ -2299,7 +2582,6 @@
       ctx.lineTo(x2, y + jitter);
       ctx.stroke();
 
-      // Garis kepang diagonal
       ctx.strokeStyle = '#B45309';
       ctx.lineWidth = 2.2;
       for (let rx = x1 + 8; rx < x2 - 8; rx += 11) {
@@ -2315,7 +2597,6 @@
       ctx.save();
       const sway = Math.max(-16, Math.min(16, -velocity * 38));
 
-      // Pita bendera Bee Gold (#FFC800) berkibar
       ctx.fillStyle = '#FFC800';
       ctx.strokeStyle = '#E5A400';
       ctx.lineWidth = 2.5;
@@ -2331,7 +2612,6 @@
       ctx.fill();
       ctx.stroke();
 
-      // Simpul lingkaran di atas tali
       ctx.beginPath();
       ctx.arc(x, y, 7, 0, Math.PI * 2);
       ctx.fill();
@@ -2339,24 +2619,29 @@
       ctx.restore();
     }
 
-    /**
-     * MASKOT 1: FOXY (RUBAH MERAH - TIM KIRI)
-     */
-    function drawFoxMascot(ctx, x, groundY, ropeY, lean, mood, t) {
+    function drawFoxMascot(ctx, x, groundY, ropeY, lean, mood, onFire, t) {
       ctx.save();
-      const scale = Math.min(1.08, Math.max(0.75, canvasH / 245));
+      const scale = Math.min(1.06, Math.max(0.72, canvasH / 245));
       const bounce = Math.sin(t * 7.5) * (mood === 'pulling' ? 2.5 : 1.3);
 
       ctx.translate(x, groundY);
       ctx.scale(scale, scale);
 
-      // Bayangan di rumput
+      // Aura Api Streak 3x+
+      if (onFire) {
+        const pulse = 36 + Math.sin(t * 14) * 4;
+        ctx.fillStyle = 'rgba(255, 150, 0, 0.25)';
+        ctx.beginPath();
+        ctx.arc(0, -40, pulse, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
       ctx.beginPath();
       ctx.ellipse(0, 3, 25, 6, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Ekor Rubah Lebat di Belakang (Kiri)
+      // Ekor Rubah
       ctx.save();
       const tailWag = Math.sin(t * 9) * 0.15;
       ctx.translate(-14, -18 + bounce);
@@ -2368,14 +2653,13 @@
       ctx.ellipse(-16, 0, 18, 10, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-      // Ujung ekor putih
       ctx.fillStyle = '#FFFFFF';
       ctx.beginPath();
       ctx.arc(-28, 0, 7.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Kaki menjejak kuat
+      // Kaki
       ctx.strokeStyle = '#7F1D1D';
       ctx.lineWidth = 7;
       ctx.lineCap = 'round';
@@ -2386,7 +2670,6 @@
       ctx.lineTo(16, -3);
       ctx.stroke();
 
-      // Sepatu bulat putih
       ctx.fillStyle = '#FFFFFF';
       ctx.strokeStyle = '#7F1D1D';
       ctx.lineWidth = 2.5;
@@ -2396,12 +2679,11 @@
       ctx.fill();
       ctx.stroke();
 
-      // Badan & Kepala Condong
+      // Badan & Kepala
       ctx.save();
       ctx.translate(0, -22 + bounce);
       ctx.rotate(lean);
 
-      // Badan Kaos Merah Duolingo
       ctx.fillStyle = '#FF4B4B';
       ctx.strokeStyle = '#7F1D1D';
       ctx.lineWidth = 3;
@@ -2410,10 +2692,8 @@
       ctx.fill();
       ctx.stroke();
 
-      // Kepala Besar Ekspresif
       ctx.translate(2, -44);
 
-      // Telinga Runcing Rubah
       ctx.fillStyle = '#FF4B4B';
       ctx.beginPath();
       ctx.moveTo(-20, -10);
@@ -2431,22 +2711,18 @@
       ctx.fill();
       ctx.stroke();
 
-      // Bentuk Kepala Oval Bulat
       ctx.fillStyle = '#FF4B4B';
       ctx.beginPath();
       ctx.ellipse(0, 0, 24, 20, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      // Pipi Putih Rubah
       ctx.fillStyle = '#FFFFFF';
       ctx.beginPath();
       ctx.ellipse(9, 7, 13, 10, -0.2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Ekspresi Wajah Rubah (Menghadap Kanan ke Tengah Tali)
       if (mood === 'pulling') {
-        // Menyeringai semangat & mata menyipit kuat
         ctx.strokeStyle = '#2B2B2B';
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
@@ -2456,13 +2732,11 @@
         ctx.lineTo(4, 1);
         ctx.stroke();
 
-        // Mulut terbuka berteriak semangat
         ctx.fillStyle = '#7F1D1D';
         ctx.beginPath();
         ctx.arc(12, 9, 5.5, 0, Math.PI);
         ctx.fill();
       } else if (mood === 'panicked') {
-        // Mata lebar panik + keringat
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
         ctx.arc(9, -3, 6, 0, Math.PI * 2);
@@ -2476,13 +2750,11 @@
         ctx.arc(10, -3, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Tetes keringat biru
         ctx.fillStyle = '#1CB0F6';
         ctx.beginPath();
         ctx.arc(-14, -4, 3.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Mulut bergelombang panik
         ctx.strokeStyle = '#2B2B2B';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
@@ -2490,7 +2762,6 @@
         ctx.quadraticCurveTo(10, 7, 14, 10);
         ctx.stroke();
       } else {
-        // Fokus percaya diri
         ctx.fillStyle = '#2B2B2B';
         ctx.beginPath();
         ctx.arc(9, -3, 4.2, 0, Math.PI * 2);
@@ -2500,7 +2771,6 @@
         ctx.arc(10.5, -4.5, 1.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Alis tegas
         ctx.strokeStyle = '#7F1D1D';
         ctx.lineWidth = 2.8;
         ctx.lineCap = 'round';
@@ -2509,7 +2779,6 @@
         ctx.lineTo(14, -7);
         ctx.stroke();
 
-        // Senyum percaya diri
         ctx.strokeStyle = '#2B2B2B';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
@@ -2517,7 +2786,6 @@
         ctx.stroke();
       }
 
-      // Hidung hitam di ujung moncong kanan
       ctx.fillStyle = '#2B2B2B';
       ctx.beginPath();
       ctx.ellipse(21, 3, 4, 3, 0, 0, Math.PI * 2);
@@ -2525,7 +2793,6 @@
 
       ctx.restore();
 
-      // Lengan & Tangan Memegang Tali
       const handY = (ropeY - groundY) / scale;
       ctx.strokeStyle = '#FF4B4B';
       ctx.lineWidth = 7.5;
@@ -2535,7 +2802,6 @@
       ctx.lineTo(18, handY);
       ctx.stroke();
 
-      // Sarung tangan putih
       ctx.fillStyle = '#FFFFFF';
       ctx.strokeStyle = '#7F1D1D';
       ctx.lineWidth = 2.5;
@@ -2547,24 +2813,27 @@
       ctx.restore();
     }
 
-    /**
-     * MASKOT 2: BUBU (BERUANG BIRU - TIM KANAN)
-     */
-    function drawBearMascot(ctx, x, groundY, ropeY, lean, mood, t) {
+    function drawBearMascot(ctx, x, groundY, ropeY, lean, mood, onFire, t) {
       ctx.save();
-      const scale = Math.min(1.08, Math.max(0.75, canvasH / 245));
+      const scale = Math.min(1.06, Math.max(0.72, canvasH / 245));
       const bounce = Math.sin(t * 7.5 + 1.5) * (mood === 'pulling' ? 2.5 : 1.3);
 
       ctx.translate(x, groundY);
       ctx.scale(scale, scale);
 
-      // Bayangan di rumput
+      if (onFire) {
+        const pulse = 36 + Math.sin(t * 14) * 4;
+        ctx.fillStyle = 'rgba(255, 150, 0, 0.25)';
+        ctx.beginPath();
+        ctx.arc(0, -40, pulse, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
       ctx.beginPath();
       ctx.ellipse(0, 3, 26, 6, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Kaki menjejak kuat
       ctx.strokeStyle = '#0C4A6E';
       ctx.lineWidth = 7.5;
       ctx.lineCap = 'round';
@@ -2575,7 +2844,6 @@
       ctx.lineTo(15, -3);
       ctx.stroke();
 
-      // Sepatu putih
       ctx.fillStyle = '#FFFFFF';
       ctx.strokeStyle = '#0C4A6E';
       ctx.lineWidth = 2.5;
@@ -2585,12 +2853,10 @@
       ctx.fill();
       ctx.stroke();
 
-      // Badan & Kepala Condong
       ctx.save();
       ctx.translate(0, -22 + bounce);
       ctx.rotate(lean);
 
-      // Badan Beruang Biru
       ctx.fillStyle = '#1CB0F6';
       ctx.strokeStyle = '#0C4A6E';
       ctx.lineWidth = 3;
@@ -2599,10 +2865,8 @@
       ctx.fill();
       ctx.stroke();
 
-      // Kepala Besar Beruang
       ctx.translate(-2, -45);
 
-      // Telinga Bulat Beruang
       ctx.fillStyle = '#1CB0F6';
       ctx.beginPath();
       ctx.arc(-18, -16, 9, 0, Math.PI * 2);
@@ -2610,19 +2874,16 @@
       ctx.fill();
       ctx.stroke();
 
-      // Kepala Oval
       ctx.beginPath();
       ctx.ellipse(0, 0, 25, 21, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      // Moncong Biru Muda (#E0F2FE)
       ctx.fillStyle = '#E0F2FE';
       ctx.beginPath();
       ctx.ellipse(-10, 6, 12, 9.5, 0.15, 0, Math.PI * 2);
       ctx.fill();
 
-      // Ekspresi Wajah Beruang (Menghadap Kiri ke Tengah Tali)
       if (mood === 'pulling') {
         ctx.strokeStyle = '#0C4A6E';
         ctx.lineWidth = 3;
@@ -2651,7 +2912,6 @@
         ctx.arc(-10, -3, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Tetes keringat
         ctx.fillStyle = '#84D8FF';
         ctx.beginPath();
         ctx.arc(15, -4, 3.5, 0, Math.PI * 2);
@@ -2687,7 +2947,6 @@
         ctx.stroke();
       }
 
-      // Hidung Beruang
       ctx.fillStyle = '#0C4A6E';
       ctx.beginPath();
       ctx.ellipse(-20, 3, 4.2, 3, 0, 0, Math.PI * 2);
@@ -2695,7 +2954,6 @@
 
       ctx.restore();
 
-      // Lengan & Tangan Memegang Tali
       const handY = (ropeY - groundY) / scale;
       ctx.strokeStyle = '#1CB0F6';
       ctx.lineWidth = 8;
@@ -2705,7 +2963,6 @@
       ctx.lineTo(-18, handY);
       ctx.stroke();
 
-      // Sarung tangan putih
       ctx.fillStyle = '#FFFFFF';
       ctx.strokeStyle = '#0C4A6E';
       ctx.lineWidth = 2.5;
@@ -2752,7 +3009,7 @@
 
         ctx.save();
         ctx.globalAlpha = c.alpha;
-        ctx.font = '900 17px "Nunito", sans-serif';
+        ctx.font = '900 16px "Nunito", sans-serif';
         ctx.textAlign = 'center';
         ctx.lineWidth = 4;
         ctx.strokeStyle = '#FFFFFF';
@@ -2833,7 +3090,7 @@
 
     /**
      * =========================================================================
-     * 11. MESIN PWA, IKON CANVAS PNG OTOMATIS & EKSPOR GITHUB PAGES
+     * 11. MESIN PWA, DETEKSI PERANGKAT HP/LAPTOP & EKSPOR GITHUB PAGES
      * =========================================================================
      */
     const DuoPWA = (() => {
@@ -2842,9 +3099,15 @@
       let icon192DataUrl = '';
       let icon512DataUrl = '';
 
+      function isMobileDevice() {
+        return (
+          /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+          (navigator.maxTouchPoints > 1 && window.innerWidth < 1024)
+        );
+      }
+
       /**
        * Menggambar ikon aplikasi PNG resolusi tinggi di Canvas offscreen
-       * (Latar Feather Green #58CC02, emblem Foxy vs Bubu, tali emas & simbol matematika)
        */
       function renderAppIconPNG(size) {
         const c = document.createElement('canvas');
@@ -2856,25 +3119,23 @@
         ctx.save();
         ctx.scale(s, s);
 
-        // 1. Latar Squircle Duolingo Feather Green (#58CC02)
+        // Squircle Duolingo Feather Green (#58CC02)
         ctx.fillStyle = '#58CC02';
         ctx.beginPath();
         ctx.roundRect(16, 16, 480, 480, 108);
         ctx.fill();
 
-        // Bibir bayangan bawah 3D khas Duolingo (#58A700)
         ctx.fillStyle = '#58A700';
         ctx.beginPath();
         ctx.roundRect(16, 420, 480, 76, [0, 0, 108, 108]);
         ctx.fill();
 
-        // Kilau atas lembut
         ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
         ctx.beginPath();
         ctx.roundRect(36, 32, 440, 175, 84);
         ctx.fill();
 
-        // 2. Simbol Matematika Melengkung di Bagian Atas (+ − × ÷)
+        // Simbol Matematika (+ − × ÷)
         const symbols = [
           { ch: '+', x: 112, y: 122, rot: -0.22 },
           { ch: '−', x: 206, y: 98, rot: -0.08 },
@@ -2895,7 +3156,7 @@
           ctx.restore();
         });
 
-        // 3. Lingkaran Arena Putih Terang di Tengah
+        // Lingkaran Putih Arena
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
         ctx.arc(256, 282, 152, 0, Math.PI * 2);
@@ -2904,7 +3165,7 @@
         ctx.strokeStyle = '#D7FFB8';
         ctx.stroke();
 
-        // 4. Tali Tambang Emas Melintang & Bendera Bee Gold
+        // Tali Tambang & Bendera Emas
         ctx.strokeStyle = '#92400E';
         ctx.lineWidth = 22;
         ctx.lineCap = 'round';
@@ -2920,7 +3181,6 @@
         ctx.lineTo(394, 336);
         ctx.stroke();
 
-        // Bendera Tengah (#FFC800)
         ctx.fillStyle = '#FFC800';
         ctx.strokeStyle = '#E5A400';
         ctx.lineWidth = 5;
@@ -2934,10 +3194,9 @@
         ctx.fill();
         ctx.stroke();
 
-        // 5. Maskot Foxy (Rubah Merah - Kiri)
+        // Foxy (Kiri)
         ctx.save();
         ctx.translate(166, 256);
-        // Telinga
         ctx.fillStyle = '#FF4B4B';
         ctx.strokeStyle = '#7F1D1D';
         ctx.lineWidth = 7;
@@ -2958,19 +3217,16 @@
         ctx.fill();
         ctx.stroke();
 
-        // Kepala
         ctx.beginPath();
         ctx.ellipse(0, 4, 52, 44, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // Pipi Putih
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
         ctx.ellipse(16, 16, 26, 20, -0.2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Mata & Hidung
         ctx.fillStyle = '#2B2B2B';
         ctx.beginPath();
         ctx.arc(14, -4, 7.5, 0, Math.PI * 2);
@@ -2985,29 +3241,28 @@
         ctx.fill();
         ctx.restore();
 
-        // 6. Maskot Bubu (Beruang Biru - Kanan)
+        // Bubu (Kanan)
         ctx.save();
         ctx.translate(346, 256);
         ctx.fillStyle = '#1CB0F6';
         ctx.strokeStyle = '#0C4A6E';
         ctx.lineWidth = 7;
-        // Telinga
         ctx.beginPath();
         ctx.arc(-36, -34, 19, 0, Math.PI * 2);
         ctx.arc(36, -34, 19, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-        // Kepala
+
         ctx.beginPath();
         ctx.ellipse(0, 4, 52, 44, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-        // Moncong
+
         ctx.fillStyle = '#E0F2FE';
         ctx.beginPath();
         ctx.ellipse(-18, 16, 24, 19, 0.15, 0, Math.PI * 2);
         ctx.fill();
-        // Mata & Hidung
+
         ctx.fillStyle = '#0C4A6E';
         ctx.beginPath();
         ctx.arc(-14, -4, 7.5, 0, Math.PI * 2);
@@ -3026,9 +3281,6 @@
         return c.toDataURL('image/png');
       }
 
-      /**
-       * Membangun objek Web App Manifest yang kompatibel dengan GitHub Pages subpath
-       */
       function buildManifestObject(forDownload = false) {
         let startUrl = './index.html';
         let scopeUrl = './';
@@ -3050,30 +3302,10 @@
           theme_color: '#58CC02',
           categories: ['education', 'games'],
           icons: [
-            {
-              src: icon192DataUrl,
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: icon192DataUrl,
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'maskable'
-            },
-            {
-              src: icon512DataUrl,
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: icon512DataUrl,
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable'
-            }
+            { src: icon192DataUrl, sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: icon192DataUrl, sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+            { src: icon512DataUrl, sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: icon512DataUrl, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
           ]
         };
       }
@@ -3100,14 +3332,10 @@
             manifestLink.href = URL.createObjectURL(blob);
           }
         } catch (err) {
-          // Abaikan jika dijalankan di lingkungan sandbox tanpa Blob URL
+          // Abaikan pada sandbox tanpa Blob URL
         }
       }
 
-      /**
-       * Mendaftarkan './sw.js' secara aman hanya jika file tersebut tersedia di server
-       * (Tidak menimbulkan error di konsol jika pengguna hanya mengunggah index.html)
-       */
       async function registerOptionalServiceWorker() {
         if (!('serviceWorker' in navigator)) return;
         if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') return;
@@ -3119,54 +3347,51 @@
             await navigator.serviceWorker.register('./sw.js');
           }
         } catch (err) {
-          // Tidak masalah jika sw.js tidak diunggah
+          // Tidak masalah jika sw.js belum diunggah
         }
+      }
+
+      function switchInstallTab(tabKey) {
+        document.querySelectorAll('.install-tab-btn').forEach(btn => {
+          const active = btn.dataset.tab === tabKey;
+          btn.className = active
+            ? 'install-tab-btn duo-btn duo-card-selected-blue py-2.5 px-2 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5'
+            : 'install-tab-btn duo-btn duo-btn-white py-2.5 px-2 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5';
+        });
+
+        document.getElementById('tabContentHp').classList.toggle('hidden', tabKey !== 'hp');
+        document.getElementById('tabContentLaptop').classList.toggle('hidden', tabKey !== 'laptop');
+        document.getElementById('tabContentGithub').classList.toggle('hidden', tabKey !== 'github');
       }
 
       function updateInstallUI() {
         const headerBtn = document.getElementById('btnInstallApp');
         const headerLabel = document.getElementById('btnInstallAppLabel');
-        const readyDot = document.getElementById('installReadyDot');
-        const modalBtn = document.getElementById('btnModalInstallNow');
+        const directBanner = document.getElementById('directInstallBanner');
         const statusBadge = document.getElementById('installStatusBadge');
-        const promptHint = document.getElementById('installPromptHint');
 
         isStandalone =
           window.matchMedia('(display-mode: standalone)').matches ||
           window.navigator.standalone === true;
 
         if (isStandalone) {
-          headerBtn.className = 'duo-btn duo-btn-green px-3 sm:px-4 py-2 flex items-center gap-2 font-extrabold text-xs sm:text-sm';
-          headerLabel.textContent = 'Terinstal ✓';
-          readyDot.classList.add('hidden');
-
-          statusBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#D7FFB8] text-[#58A700] font-extrabold text-xs uppercase tracking-wider mb-1';
-          statusBadge.textContent = '✓ Berjalan dalam Mode Aplikasi';
-          promptHint.textContent = 'Aplikasi sudah terpasang dan berjalan dalam jendela mandiri.';
-          modalBtn.disabled = true;
-          modalBtn.querySelector('span').textContent = 'Sudah Terinstal';
+          headerBtn.className = 'duo-btn duo-btn-green h-10 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-extrabold text-xs sm:text-sm whitespace-nowrap shrink-0';
+          headerLabel.textContent = 'Terpasang ✓';
+          directBanner.classList.add('hidden');
+          statusBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#D7FFB8] text-[#58A700] font-extrabold text-[11px] uppercase tracking-wider mb-1';
+          statusBadge.textContent = '✓ Terpasang Sebagai Aplikasi';
         } else if (deferredPrompt) {
-          headerBtn.className = 'duo-btn duo-btn-green px-3 sm:px-4 py-2 flex items-center gap-2 font-extrabold text-xs sm:text-sm';
-          headerLabel.textContent = 'Instal Aplikasi';
-          readyDot.classList.remove('hidden');
-
-          statusBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#D7FFB8] text-[#58A700] font-extrabold text-xs uppercase tracking-wider mb-1';
-          statusBadge.textContent = '● Siap Diinstal Langsung';
-          promptHint.textContent = 'Browser mendukung instalasi langsung! Klik tombol hijau di samping.';
-          modalBtn.disabled = false;
-          modalBtn.className = 'duo-btn duo-btn-green px-5 py-3 font-black text-sm uppercase tracking-wide shrink-0 flex items-center justify-center gap-2';
-          modalBtn.querySelector('span').textContent = 'Instal Sekarang';
+          headerBtn.className = 'duo-btn duo-btn-green h-10 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-extrabold text-xs sm:text-sm whitespace-nowrap shrink-0';
+          headerLabel.textContent = 'Instal App';
+          directBanner.classList.remove('hidden');
+          statusBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#D7FFB8] text-[#58A700] font-extrabold text-[11px] uppercase tracking-wider mb-1';
+          statusBadge.textContent = '● Siap Dipasang Langsung';
         } else {
-          headerBtn.className = 'duo-btn duo-btn-blue px-3 sm:px-4 py-2 flex items-center gap-2 font-extrabold text-xs sm:text-sm';
-          headerLabel.textContent = 'Instal Aplikasi';
-          readyDot.classList.add('hidden');
-
-          statusBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#DDF4FF] text-[#1899D6] font-extrabold text-xs uppercase tracking-wider mb-1';
+          headerBtn.className = 'duo-btn duo-btn-blue h-10 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-extrabold text-xs sm:text-sm whitespace-nowrap shrink-0';
+          headerLabel.textContent = 'Instal App';
+          directBanner.classList.add('hidden');
+          statusBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#DDF4FF] text-[#1899D6] font-extrabold text-[11px] uppercase tracking-wider mb-1';
           statusBadge.textContent = 'Aplikasi Web Progresif (PWA)';
-          promptHint.textContent = 'Jika tombol otomatis belum muncul, ikuti langkah Menu Chrome (⋮) di bawah ini.';
-          modalBtn.disabled = true;
-          modalBtn.className = 'duo-btn duo-btn-ghost px-5 py-3 font-black text-sm uppercase tracking-wide shrink-0 flex items-center justify-center gap-2';
-          modalBtn.querySelector('span').textContent = 'Gunakan Menu Chrome';
         }
       }
 
@@ -3181,8 +3406,6 @@
           if (choice && choice.outcome === 'accepted') {
             deferredPrompt = null;
             closeModal();
-          } else {
-            openModal();
           }
           updateInstallUI();
         } catch (err) {
@@ -3192,6 +3415,8 @@
 
       function openModal() {
         updateInstallUI();
+        // Otomatis sorot tab sesuai perangkat yang sedang digunakan (HP vs Laptop)
+        switchInstallTab(isMobileDevice() ? 'hp' : 'laptop');
         document.getElementById('installModal').classList.remove('hidden');
       }
 
@@ -3213,7 +3438,7 @@
 
       function generateServiceWorkerSource() {
         return `// Service Worker — Tarik Tambang Matematika (Mode Offline Kelas)
-const CACHE_NAME = 'tarik-tambang-mtk-v1';
+const CACHE_NAME = 'tarik-tambang-mtk-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -3274,20 +3499,24 @@ self.addEventListener('fetch', (event) => {
           closeModal();
         });
 
-        // Tombol Header 'Instal Aplikasi'
+        // Tombol Header 'Instal App'
         document.getElementById('btnInstallApp').addEventListener('click', () => {
           DuoAudio.tap();
-          if (deferredPrompt) {
-            triggerNativePrompt();
-          } else {
-            openModal();
-          }
+          openModal();
         });
 
-        // Tombol 'Instal Sekarang' di dalam Modal
+        // Tombol 'Pasang Aplikasi Sekarang' di dalam Modal
         document.getElementById('btnModalInstallNow').addEventListener('click', () => {
           DuoAudio.tap();
           triggerNativePrompt();
+        });
+
+        // Tab switcher di Modal
+        document.querySelectorAll('.install-tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            DuoAudio.tap();
+            switchInstallTab(btn.dataset.tab);
+          });
         });
 
         // Tutup Modal
@@ -3302,21 +3531,19 @@ self.addEventListener('fetch', (event) => {
           }
         });
 
-        // Unduh index.html siap upload ke GitHub Pages
+        // Unduh paket file GitHub Pages
         document.getElementById('btnDownloadHtml').addEventListener('click', () => {
           DuoAudio.tap();
           const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
           downloadFile('index.html', fullHtml, 'text/html;charset=utf-8');
         });
 
-        // Unduh manifest.json (dengan ikon PNG tertanam)
         document.getElementById('btnDownloadManifest').addEventListener('click', () => {
           DuoAudio.tap();
           const manifestJson = JSON.stringify(buildManifestObject(true), null, 2);
           downloadFile('manifest.json', manifestJson, 'application/manifest+json;charset=utf-8');
         });
 
-        // Unduh sw.js untuk mode offline kelas
         document.getElementById('btnDownloadSw').addEventListener('click', () => {
           DuoAudio.tap();
           downloadFile('sw.js', generateServiceWorkerSource(), 'application/javascript;charset=utf-8');
@@ -3340,6 +3567,8 @@ self.addEventListener('fetch', (event) => {
      */
     window.onload = function () {
       DuoPWA.init();
+      syncAudioButtonsUI();
+      DuoAudio.setBgmMode('lobby');
       setupScreenEvents();
       resizeArenaCanvas();
       requestAnimationFrame(arenaRenderLoop);
