@@ -111,11 +111,31 @@
     .duo-btn.is-pressed {
       transform: translateY(3px);
       box-shadow: 0 1px 0 var(--btn-shadow, #E5E5E5);
+      filter: brightness(0.97);
     }
 
     .duo-btn:disabled {
       opacity: 0.55;
       cursor: not-allowed;
+    }
+
+    /* Area Bermain Multi-Touch: Cegah Browser Mencegat Sentuhan Kedua sebagai Zoom/Scroll */
+    .duo-touch-zone,
+    .duo-touch-zone * {
+      touch-action: none !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+
+    /* Lencana Pintasan Keyboard: Tampil Halus di Laptop/PC, Tersembunyi di Layar Sentuh HP/Tablet */
+    .kbd-hint {
+      display: none;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .kbd-hint {
+        display: inline-block;
+      }
     }
 
     /* Varian Warna Tombol 3D */
@@ -602,7 +622,7 @@
   <!-- ===================================================================== -->
   <!-- 2. ARENA BERMAIN SPLIT-SCREEN SIMETRIS (GAMEPLAY SCREEN)              -->
   <!-- ===================================================================== -->
-  <div id="gameScreen" class="hidden h-screen w-screen overflow-hidden flex flex-col bg-[#F7F7F7]">
+  <div id="gameScreen" class="duo-touch-zone hidden h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#F7F7F7]">
     
     <!-- BAGIAN ATAS (~34% TINGGI LAYAR): ARENA TARIK TAMBANG + HUD BERSIH -->
     <section class="relative w-full h-[34%] min-h-[185px] max-h-[300px] bg-[#DDF4FF] border-b-4 border-[#E5E5E5] shrink-0 overflow-hidden">
@@ -1097,12 +1117,6 @@
      * =========================================================================
      * 1. MESIN MUSIK LATAR (BGM) & EFEK SUARA (SFX) PROSEDURAL WEB AUDIO API
      * =========================================================================
-     * - 100% sintetis Web Audio API (tanpa file MP3 eksternal, jalan offline).
-     * - Kontrol terpisah antara BGM (Musik Latar) dan SFX (Efek Suara).
-     * - 3 dinamika musik otomatis:
-     *   1) 'lobby' (112 BPM): Melodi kalimba/marimba C-G Major lembut.
-     *   2) 'match' (126 BPM): Ritme ceria penuh semangat dengan bass & arpeggio.
-     *   3) 'tense' (138 BPM): Tempo naik saat mendekati garis menang / 10d akhir.
      */
     const DuoAudio = (() => {
       let audioCtx = null;
@@ -1114,10 +1128,8 @@
       let currentStep = 0;
       let nextNoteTime = 0;
 
-      // Skala pentatonik mayor C5..D6 untuk nada naik setiap streak
       const PENTATONIC_SCALE = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50, 1174.66];
 
-      // Melodi Lobi (32 langkah eighth-note = 4 bar @ 112 BPM, kalimba lembut)
       const LOBBY_MELODY = [
         523.25, 0, 659.25, 587.33,   523.25, 0, 392.00, 0,
         440.00, 0, 523.25, 493.88,   392.00, 0, 0, 0,
@@ -1131,7 +1143,6 @@
         196.00, 0, 0, 0,   130.81, 0, 0, 0
       ];
 
-      // Melodi Pertandingan Ceria (32 langkah eighth-note = 4 bar @ 126 BPM)
       const MATCH_MELODY = [
         523.25, 659.25, 783.99, 659.25,  880.00, 783.99, 659.25, 523.25,
         587.33, 659.25, 783.99, 880.00,  783.99, 0, 587.33, 0,
@@ -1145,7 +1156,6 @@
         196.00, 0, 246.94, 0,  130.81, 196.00, 130.81, 0
       ];
 
-      // Melodi Tegang / Sudden Death (32 langkah eighth-note @ 138 BPM)
       const TENSE_MELODY = [
         659.25, 783.99, 1046.50, 783.99,  880.00, 1046.50, 1174.66, 1046.50,
         783.99, 880.00, 1046.50, 1174.66, 1318.51, 1174.66, 1046.50, 880.00,
@@ -1163,9 +1173,6 @@
         }
       }
 
-      /**
-       * Sintesis instrumen Marimba/Kalimba hangat dengan lowpass filter
-       */
       function playMarimba(freq, time, duration, volume, isBass = false) {
         if (!audioCtx || freq <= 0) return;
 
@@ -1177,7 +1184,6 @@
         oscMain.type = isBass ? 'triangle' : 'sine';
         oscMain.frequency.setValueAtTime(freq, time);
 
-        // Harmonik lembut untuk karakter kayu marimba
         oscHarmonic.type = 'sine';
         oscHarmonic.frequency.setValueAtTime(isBass ? freq * 2 : freq * 4, time);
 
@@ -1204,9 +1210,6 @@
         oscHarmonic.stop(time + duration + 0.02);
       }
 
-      /**
-       * Ketukan perkusi shaker ringan untuk musik pertandingan
-       */
       function playLightTick(time, volume) {
         if (!audioCtx) return;
         const osc = audioCtx.createOscillator();
@@ -1294,7 +1297,6 @@
         osc.stop(t0 + duration + 0.02);
       }
 
-      // Buka kunci audio pada interaksi pertama pengguna (HP / Laptop)
       const unlockHandler = () => {
         initContext();
         if (audioCtx && audioCtx.state === 'running' && bgmEnabled && bgmMode !== 'stopped') {
@@ -1307,7 +1309,6 @@
       window.addEventListener('pointerdown', unlockHandler, { passive: true });
       window.addEventListener('keydown', unlockHandler, { passive: true });
 
-      // Jeda BGM otomatis saat tab browser disembunyikan
       document.addEventListener('visibilitychange', () => {
         if (!document.hidden && audioCtx && bgmEnabled && bgmMode !== 'stopped') {
           nextNoteTime = audioCtx.currentTime + 0.06;
@@ -1587,7 +1588,6 @@
       const bgmOn = DuoAudio.isBgmEnabled();
       const sfxOn = DuoAudio.isSfxEnabled();
 
-      // Tombol BGM Setup & Game
       const btnSetupBgm = document.getElementById('btnToggleBgm');
       const btnGameBgm = document.getElementById('btnGameBgm');
       const waveBars = document.getElementById('bgmWaveBars');
@@ -1604,7 +1604,6 @@
         waveBars.querySelectorAll('.eq-bar').forEach(b => (b.style.animationPlayState = 'paused'));
       }
 
-      // Tombol SFX Setup & Game
       const speakerOnSvg = `
         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
         <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -1631,7 +1630,6 @@
     }
 
     function setupScreenEvents() {
-      // Toggle BGM (Setup & Game)
       const handleBgmClick = () => {
         DuoAudio.toggleBgm();
         DuoAudio.tap();
@@ -1640,7 +1638,6 @@
       document.getElementById('btnToggleBgm').addEventListener('click', handleBgmClick);
       document.getElementById('btnGameBgm').addEventListener('click', handleBgmClick);
 
-      // Toggle SFX (Setup & Game)
       const handleSfxClick = () => {
         const isNowOn = DuoAudio.toggleSfx();
         if (isNowOn) DuoAudio.tap();
@@ -1818,10 +1815,8 @@
         p.locked = false;
       });
 
-      // Aktifkan BGM Pertandingan Ceria (126 BPM)
       DuoAudio.setBgmMode('match');
 
-      // Perbarui label HUD
       const symbolMap = { tambah: '+', kurang: '−', kali: '×', bagi: '÷' };
       const opSymbols = gameConfig.operations.map(o => symbolMap[o]).join(' ');
       document.getElementById('hudModeBadge').textContent =
@@ -1858,7 +1853,6 @@
       nextQuestion('red');
       nextQuestion('blue');
 
-      // Timer Pertandingan
       if (gameState.timerHandle) clearInterval(gameState.timerHandle);
       const timerPill = document.getElementById('hudTimerPill');
       const timerVal = document.getElementById('hudTimerValue');
@@ -1949,13 +1943,12 @@
         buttons.forEach(item => {
           const btn = document.createElement('button');
           btn.type = 'button';
+          btn.tabIndex = -1;
+          btn.dataset.side = side;
+          btn.dataset.action = 'key';
+          btn.dataset.code = item.code;
           btn.className = `duo-btn ${item.style} flex items-center justify-center min-h-[38px]`;
           btn.textContent = item.label;
-
-          btn.addEventListener('pointerdown', e => {
-            e.preventDefault();
-            onKeypadInput(side, item.code);
-          });
 
           grid.appendChild(btn);
         });
@@ -1972,18 +1965,17 @@
         for (let i = 0; i < 4; i++) {
           const btn = document.createElement('button');
           btn.type = 'button';
+          btn.tabIndex = -1;
+          btn.dataset.side = side;
+          btn.dataset.action = 'choice';
+          btn.dataset.index = String(i);
           btn.className = 'duo-btn duo-btn-white relative flex items-center justify-center p-2';
           btn.innerHTML = `
-            <span class="hidden sm:inline-block absolute top-2 left-2.5 px-2 py-0.5 rounded-lg text-xs font-black ${badgeBg}">
+            <span class="kbd-hint absolute top-2 left-2.5 px-2 py-0.5 rounded-lg text-xs font-black ${badgeBg}">
               ${keyHints[i]}
             </span>
             <span class="choice-val font-black text-2xl sm:text-3xl lg:text-4xl text-[#3C3C3C]">-</span>
           `;
-
-          btn.addEventListener('pointerdown', e => {
-            e.preventDefault();
-            onChoiceSelect(side, i);
-          });
 
           grid.appendChild(btn);
         }
@@ -1994,41 +1986,186 @@
 
     function nextQuestion(side) {
       const p = gameState.players[side];
-      p.question = createQuestion(gameConfig.difficulty, gameConfig.operations);
-      p.qStartMs = performance.now();
+      const q = createQuestion(gameConfig.difficulty, gameConfig.operations);
+      p.question = q;
       p.typed = '';
+      p.qStartMs = performance.now();
 
-      const qBox = document.getElementById(side === 'red' ? 'questionBoxRed' : 'questionBoxBlue');
       const qEl = document.getElementById(side === 'red' ? 'questionTextRed' : 'questionTextBlue');
+      qEl.textContent = q.prompt;
+      qEl.classList.remove('animate-duo-pop');
+      void qEl.offsetWidth;
+      qEl.classList.add('animate-duo-pop');
 
-      qEl.textContent = p.question.prompt;
-      qBox.classList.remove('animate-duo-pop');
-      void qBox.offsetWidth;
-      qBox.classList.add('animate-duo-pop');
+      refreshTypedDisplay(side);
 
-      if (gameConfig.controlMode === 'keypad') {
-        refreshTypedDisplay(side);
-      } else {
+      if (gameConfig.controlMode === 'pilgan') {
         const grid = document.getElementById(side === 'red' ? 'choiceGridRed' : 'choiceGridBlue');
-        const cards = grid.querySelectorAll('button');
-        p.question.choices.forEach((val, idx) => {
-          if (cards[idx]) {
-            cards[idx].querySelector('.choice-val').textContent = val;
-          }
-        });
+        if (grid) {
+          const btns = grid.querySelectorAll('button');
+          btns.forEach((btn, idx) => {
+            btn.querySelector('.choice-val').textContent = q.choices[idx];
+            btn.classList.remove('animate-duo-pop');
+            void btn.offsetWidth;
+            btn.classList.add('animate-duo-pop');
+          });
+        }
       }
     }
 
     function refreshTypedDisplay(side) {
-      const el = document.getElementById(side === 'red' ? 'answerTextRed' : 'answerTextBlue');
-      el.textContent = gameState.players[side].typed;
+      const p = gameState.players[side];
+      const textEl = document.getElementById(side === 'red' ? 'answerTextRed' : 'answerTextBlue');
+      if (textEl) {
+        textEl.textContent = p.typed;
+      }
+    }
+
+    function showToast(side, text, colorClasses) {
+      const toast = document.getElementById(side === 'red' ? 'toastRed' : 'toastBlue');
+      toast.textContent = text;
+      toast.className = `absolute right-0 top-0 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl font-black text-[11px] sm:text-sm transition-opacity duration-150 shadow-xs pointer-events-none opacity-100 ${colorClasses}`;
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 650);
     }
 
     /**
      * =========================================================================
-     * 7. PENANGANAN INPUT, STREAK BONUS (+1.5 TARIKAN), & COOLDOWN 1.5 DETIK
+     * 7. ENGINE MULTI-TOUCH SEJATI, KEYBOARD GANDA, & ANTI-RACE CONDITION
      * =========================================================================
      */
+    const activeTouches = new Map();
+    let activeMouseBtn = null;
+    let lastTouchTime = 0;
+
+    function executeGameButtonAction(btn) {
+      if (!btn || !gameState.active) return;
+      const side = btn.dataset.side;
+      const action = btn.dataset.action;
+      if (!side || !action) return;
+
+      if (action === 'key') {
+        onKeypadInput(side, btn.dataset.code);
+      } else if (action === 'choice') {
+        onChoiceSelect(side, parseInt(btn.dataset.index, 10));
+      }
+    }
+
+    function flashButtonPress(btn) {
+      if (!btn) return;
+      btn.classList.add('is-pressed');
+      clearTimeout(btn._kbdPressTimer);
+      btn._kbdPressTimer = setTimeout(() => {
+        btn.classList.remove('is-pressed');
+      }, 115);
+    }
+
+    function syncPressedVisuals() {
+      const heldElements = new Set(activeTouches.values());
+      document.querySelectorAll('#gameScreen .duo-btn.is-pressed').forEach(el => {
+        if (!heldElements.has(el) && el !== activeMouseBtn && !el._kbdPressTimer) {
+          el.classList.remove('is-pressed');
+        }
+      });
+    }
+
+    function initMultiTouchEngine() {
+      const gameEl = document.getElementById('gameScreen');
+
+      // 1. Multi-Touch Sejati: Iterasi seluruh jari pada changedTouches di milidetik yang sama
+      gameEl.addEventListener('touchstart', e => {
+        lastTouchTime = performance.now();
+
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          const hitEl = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetBtn = hitEl ? hitEl.closest('[data-action]') : null;
+
+          if (targetBtn && !targetBtn.disabled) {
+            targetBtn.classList.add('is-pressed');
+            activeTouches.set(touch.identifier, targetBtn);
+            executeGameButtonAction(targetBtn);
+          }
+        }
+
+        e.preventDefault();
+      }, { passive: false });
+
+      // 2. Pantau pergeseran jari agar visual .is-pressed selalu sinkron per touch.identifier
+      gameEl.addEventListener('touchmove', e => {
+        lastTouchTime = performance.now();
+
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          const prevBtn = activeTouches.get(touch.identifier);
+          const hitEl = document.elementFromPoint(touch.clientX, touch.clientY);
+          const currBtn = hitEl ? hitEl.closest('[data-action]') : null;
+
+          if (prevBtn !== currBtn) {
+            if (currBtn && !currBtn.disabled) {
+              currBtn.classList.add('is-pressed');
+              activeTouches.set(touch.identifier, currBtn);
+            } else {
+              activeTouches.delete(touch.identifier);
+            }
+            if (prevBtn) {
+              let stillHeld = false;
+              activeTouches.forEach(v => {
+                if (v === prevBtn) stillHeld = true;
+              });
+              if (!stillHeld) prevBtn.classList.remove('is-pressed');
+            }
+          }
+        }
+
+        e.preventDefault();
+      }, { passive: false });
+
+      // 3. Lepas visual .is-pressed hanya untuk jari yang diangkat
+      const releaseTouches = e => {
+        lastTouchTime = performance.now();
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          const btn = activeTouches.get(touch.identifier);
+          activeTouches.delete(touch.identifier);
+          if (btn) {
+            let stillHeld = false;
+            activeTouches.forEach(v => {
+              if (v === btn) stillHeld = true;
+            });
+            if (!stillHeld) btn.classList.remove('is-pressed');
+          }
+        }
+        syncPressedVisuals();
+      };
+
+      gameEl.addEventListener('touchend', releaseTouches, { passive: false });
+      gameEl.addEventListener('touchcancel', releaseTouches, { passive: false });
+
+      // 4. Dukungan Mouse / Stylus untuk Laptop (diabaikan jika baru saja terjadi touch)
+      gameEl.addEventListener('mousedown', e => {
+        if (performance.now() - lastTouchTime < 650) return;
+        if (e.button !== 0) return;
+
+        const targetBtn = e.target.closest('[data-action]');
+        if (targetBtn && !targetBtn.disabled) {
+          activeMouseBtn = targetBtn;
+          targetBtn.classList.add('is-pressed');
+          executeGameButtonAction(targetBtn);
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (activeMouseBtn) {
+          activeMouseBtn.classList.remove('is-pressed');
+          activeMouseBtn = null;
+        }
+      });
+    }
+
     function onKeypadInput(side, code) {
       if (!gameState.active) return;
       const p = gameState.players[side];
@@ -2074,22 +2211,75 @@
       verifyAnswer(side, picked);
     }
 
+    // Input Keyboard Ganda Simultan untuk Laptop (Pilihan Ganda & Keypad Angka)
     window.addEventListener('keydown', e => {
-      if (!gameState.active || gameConfig.controlMode !== 'pilgan') return;
-      const k = e.key.toUpperCase();
-      const mapRed = ['Q', 'W', 'E', 'R'];
-      const mapBlue = ['U', 'I', 'O', 'P'];
-      if (mapRed.includes(k)) {
-        e.preventDefault();
-        onChoiceSelect('red', mapRed.indexOf(k));
-      } else if (mapBlue.includes(k)) {
-        e.preventDefault();
-        onChoiceSelect('blue', mapBlue.indexOf(k));
+      if (!gameState.active || e.repeat) return;
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+      const code = e.code;
+
+      if (gameConfig.controlMode === 'pilgan') {
+        const redMap = { KeyQ: 0, KeyW: 1, KeyE: 2, KeyR: 3, KeyA: 0, KeyS: 1, KeyD: 2, KeyF: 3 };
+        const blueMap = { KeyU: 0, KeyI: 1, KeyO: 2, KeyP: 3, KeyJ: 0, KeyK: 1, KeyL: 2, Semicolon: 3 };
+
+        if (code in redMap) {
+          e.preventDefault();
+          const idx = redMap[code];
+          const btn = document.querySelector(`#controlsRed [data-action="choice"][data-index="${idx}"]`);
+          flashButtonPress(btn);
+          onChoiceSelect('red', idx);
+        } else if (code in blueMap) {
+          e.preventDefault();
+          const idx = blueMap[code];
+          const btn = document.querySelector(`#controlsBlue [data-action="choice"][data-index="${idx}"]`);
+          flashButtonPress(btn);
+          onChoiceSelect('blue', idx);
+        }
+      } else if (gameConfig.controlMode === 'keypad') {
+        let side = null;
+        let keyCode = null;
+
+        if (code.startsWith('Digit')) {
+          side = 'red';
+          keyCode = code.replace('Digit', '');
+        } else if (code === 'Backspace') {
+          side = 'red';
+          keyCode = gameConfig.difficulty === 'sulit' ? 'NEG_OR_BACK' : 'BACK';
+        } else if (code === 'Minus') {
+          side = 'red';
+          keyCode = gameConfig.difficulty === 'sulit' ? 'NEG_OR_BACK' : 'BACK';
+        } else if (code === 'Enter') {
+          side = 'red';
+          keyCode = 'SUBMIT';
+        } else if (code.startsWith('Numpad') && code.length === 7 && /\d/.test(code[6])) {
+          side = 'blue';
+          keyCode = code[6];
+        } else if (code === 'NumpadDecimal' || code === 'Delete') {
+          side = 'blue';
+          keyCode = gameConfig.difficulty === 'sulit' ? 'NEG_OR_BACK' : 'BACK';
+        } else if (code === 'NumpadSubtract') {
+          side = 'blue';
+          keyCode = gameConfig.difficulty === 'sulit' ? 'NEG_OR_BACK' : 'BACK';
+        } else if (code === 'NumpadEnter') {
+          side = 'blue';
+          keyCode = 'SUBMIT';
+        }
+
+        if (side && keyCode) {
+          e.preventDefault();
+          const mountId = side === 'red' ? '#controlsRed' : '#controlsBlue';
+          const btn = document.querySelector(`${mountId} [data-action="key"][data-code="${keyCode}"]`);
+          flashButtonPress(btn);
+          onKeypadInput(side, keyCode);
+        }
       }
     });
 
     function verifyAnswer(side, value) {
+      if (!gameState.active) return;
       const p = gameState.players[side];
+      if (p.locked || !p.question) return;
+
       const expected = p.question.answer;
 
       if (value === expected) {
@@ -2138,7 +2328,6 @@
           emitArenaBurst('blue', hasStreakBoost);
         }
 
-        // Otomatis naikkan tempo BGM ke mode 'tense' (138 BPM) jika tali mendekati garis menang!
         if (Math.abs(gameState.ropeSteps) >= gameConfig.targetSteps - 1.5) {
           DuoAudio.setBgmMode('tense');
         } else if (gameConfig.timeLimit === 0 || gameState.timeLeft > 10) {
@@ -2155,1203 +2344,842 @@
 
         nextQuestion(side);
       } else {
+        // Jawaban Salah -> Reset streak & kunci panel 1,5 detik
         p.wrong++;
         p.streak = 0;
-        p.typed = '';
-        if (gameConfig.controlMode === 'keypad') refreshTypedDisplay(side);
-
-        document.getElementById(side === 'red' ? 'streakBadgeRed' : 'streakBadgeBlue').classList.add('hidden');
         DuoAudio.wrong();
-        showToast(side, 'Salah!', 'bg-[#FF4B4B] text-white');
 
-        const qBox = document.getElementById(side === 'red' ? 'questionBoxRed' : 'questionBoxBlue');
-        qBox.classList.remove('animate-duo-shake');
-        void qBox.offsetWidth;
-        qBox.classList.add('animate-duo-shake');
+        const badge = document.getElementById(side === 'red' ? 'streakBadgeRed' : 'streakBadgeBlue');
+        badge.classList.add('hidden');
 
-        activateCooldownLock(side);
+        showToast(side, 'Ups! Salah', 'bg-[#FF4B4B] text-white');
+        triggerWrongPenalty(side);
       }
     }
 
-    function showToast(side, label, colorClasses) {
-      const el = document.getElementById(side === 'red' ? 'toastRed' : 'toastBlue');
-      el.textContent = label;
-      el.className = `absolute right-0 top-0 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl font-black text-[11px] sm:text-sm pointer-events-none transition-opacity duration-150 shadow-xs ${colorClasses}`;
-      el.style.opacity = '1';
-      clearTimeout(el._timer);
-      el._timer = setTimeout(() => {
-        el.style.opacity = '0';
-      }, 850);
-    }
-
-    function activateCooldownLock(side) {
+    function triggerWrongPenalty(side) {
       const p = gameState.players[side];
       p.locked = true;
+      p.typed = '';
+      refreshTypedDisplay(side);
 
+      const qBox = document.getElementById(side === 'red' ? 'questionBoxRed' : 'questionBoxBlue');
       const overlay = document.getElementById(side === 'red' ? 'cooldownOverlayRed' : 'cooldownOverlayBlue');
       const bar = document.getElementById(side === 'red' ? 'cooldownBarRed' : 'cooldownBarBlue');
+
+      qBox.classList.remove('animate-duo-shake');
+      void qBox.offsetWidth;
+      qBox.classList.add('animate-duo-shake');
 
       overlay.classList.remove('hidden');
       bar.style.transition = 'none';
       bar.style.width = '100%';
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          bar.style.transition = 'width 1500ms linear';
-          bar.style.width = '0%';
-        });
-      });
+      void bar.offsetWidth;
+      bar.style.transition = 'width 1500ms linear';
+      bar.style.width = '0%';
 
       if (p.lockTimeout) clearTimeout(p.lockTimeout);
       p.lockTimeout = setTimeout(() => {
         p.locked = false;
         overlay.classList.add('hidden');
+        if (gameState.active) {
+          nextQuestion(side);
+        }
       }, 1500);
-    }
-
-    function updateTopGaugeHUD() {
-      const target = gameConfig.targetSteps;
-      const redSteps = Math.max(0, -gameState.ropeSteps);
-      const blueSteps = Math.max(0, gameState.ropeSteps);
-
-      const fmt = n => (Number.isInteger(n) ? n : n.toFixed(1));
-      document.getElementById('hudRedDistance').textContent = `${fmt(redSteps)}/${target}`;
-      document.getElementById('hudBlueDistance').textContent = `${fmt(blueSteps)}/${target}`;
-
-      const ratio = (gameState.ropeSteps / target) * 50;
-      const redPct = Math.max(5, Math.min(95, 50 - ratio));
-      const bluePct = 100 - redPct;
-      document.getElementById('hudGaugeFillRed').style.width = `${redPct}%`;
-      document.getElementById('hudGaugeFillBlue').style.width = `${bluePct}%`;
     }
 
     /**
      * =========================================================================
-     * 8. LAYAR HASIL & STATISTIK KEMENANGAN (DUOLINGO VICTORY MODAL)
+     * 8. UPDATE HUD PROGRESS & LAYAR PEMENANG
      * =========================================================================
      */
-    function getCrownedMascotSVG(winner) {
-      if (winner === 'red') {
-        return `
-          <svg viewBox="0 0 100 100" class="w-full h-full">
-            <polygon points="28,24 34,8 50,18 66,8 72,24" fill="#FFC800" stroke="#E5A400" stroke-width="3" stroke-linejoin="round"/>
-            <circle cx="34" cy="8" r="3" fill="#FF4B4B"/>
-            <circle cx="50" cy="15" r="3" fill="#1CB0F6"/>
-            <circle cx="66" cy="8" r="3" fill="#58CC02"/>
-            <polygon points="22,42 18,18 40,30" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5" stroke-linejoin="round"/>
-            <polygon points="78,42 82,18 60,30" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5" stroke-linejoin="round"/>
-            <ellipse cx="50" cy="56" rx="28" ry="24" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5"/>
-            <path d="M23 56 C31 56, 39 62, 50 79 C32 79, 23 69, 23 56 Z" fill="#FFFFFF"/>
-            <path d="M77 56 C69 56, 61 62, 50 79 C68 79, 77 69, 77 56 Z" fill="#FFFFFF"/>
-            <path d="M33 52 Q38 45 43 52" fill="none" stroke="#2B2B2B" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M57 52 Q62 45 67 52" fill="none" stroke="#2B2B2B" stroke-width="3.2" stroke-linecap="round"/>
-            <ellipse cx="50" cy="63" rx="4.5" ry="3.2" fill="#2B2B2B"/>
-            <path d="M41 69 Q50 78 59 69 Z" fill="#2B2B2B"/>
-          </svg>
-        `;
-      } else if (winner === 'blue') {
-        return `
-          <svg viewBox="0 0 100 100" class="w-full h-full">
-            <polygon points="28,24 34,8 50,18 66,8 72,24" fill="#FFC800" stroke="#E5A400" stroke-width="3" stroke-linejoin="round"/>
-            <circle cx="34" cy="8" r="3" fill="#FF4B4B"/>
-            <circle cx="50" cy="15" r="3" fill="#58CC02"/>
-            <circle cx="66" cy="8" r="3" fill="#1CB0F6"/>
-            <circle cx="26" cy="34" r="11" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
-            <circle cx="74" cy="34" r="11" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
-            <ellipse cx="50" cy="56" rx="28" ry="24" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
-            <ellipse cx="50" cy="64" rx="14" ry="11" fill="#E0F2FE"/>
-            <path d="M33 51 Q38 44 43 51" fill="none" stroke="#2B2B2B" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M57 51 Q62 44 67 51" fill="none" stroke="#2B2B2B" stroke-width="3.2" stroke-linecap="round"/>
-            <ellipse cx="50" cy="60" rx="5" ry="3.5" fill="#0C4A6E"/>
-            <path d="M41 66 Q50 75 59 66 Z" fill="#0C4A6E"/>
-          </svg>
-        `;
-      } else {
-        return `
-          <svg viewBox="0 0 100 100" class="w-full h-full">
-            <circle cx="50" cy="52" r="34" fill="#FFC800" stroke="#E5A400" stroke-width="4"/>
-            <polygon points="50,26 57,42 74,44 61,56 65,73 50,64 35,73 39,56 26,44 43,42" fill="#FFFFFF"/>
-          </svg>
-        `;
-      }
+    function updateTopGaugeHUD() {
+      const target = gameConfig.targetSteps;
+      const steps = gameState.ropeSteps;
+
+      const redProgress = steps < 0 ? Math.min(target, Math.abs(steps)) : 0;
+      const blueProgress = steps > 0 ? Math.min(target, steps) : 0;
+
+      const fmt = v => (Number.isInteger(v) ? v : v.toFixed(1));
+      document.getElementById('hudRedDistance').textContent = `${fmt(redProgress)}/${target}`;
+      document.getElementById('hudBlueDistance').textContent = `${fmt(blueProgress)}/${target}`;
+
+      const ratio = Math.max(-1, Math.min(1, steps / target));
+      const redPct = 50 - ratio * 50;
+      const bluePct = 100 - redPct;
+
+      document.getElementById('hudGaugeFillRed').style.width = `${redPct}%`;
+      document.getElementById('hudGaugeFillBlue').style.width = `${bluePct}%`;
     }
 
     function concludeByLine(winnerSide) {
       gameState.active = false;
       if (gameState.timerHandle) clearInterval(gameState.timerHandle);
+      DuoAudio.victory();
 
       const winnerName = winnerSide === 'red' ? gameConfig.redName : gameConfig.blueName;
-      document.getElementById('winnerMascotContainer').innerHTML = getCrownedMascotSVG(winnerSide);
-      document.getElementById('victoryBadge').textContent = 'GARIS KEMENANGAN TERCAPAI!';
-
-      const headline = document.getElementById('victoryHeadline');
-      headline.textContent = `${winnerName} Menang!`;
-      headline.className = `text-2xl sm:text-4xl font-black tracking-tight ${
-        winnerSide === 'red' ? 'text-[#FF4B4B]' : 'text-[#1CB0F6]'
-      }`;
-      document.getElementById('victorySubtext').textContent =
-        `Berhasil menarik tali melewati batas ${gameConfig.targetSteps} langkah!`;
-
-      openVictoryModal();
+      showVictoryModal({
+        winner: winnerSide,
+        headline: `${winnerName} Menang!`,
+        subtext: 'Berhasil menarik bendera melewati garis kemenangan!'
+      });
     }
 
     function concludeByTimeout() {
       gameState.active = false;
-      const headline = document.getElementById('victoryHeadline');
-      document.getElementById('victoryBadge').textContent = 'WAKTU PERTANDINGAN HABIS';
+      DuoAudio.victory();
 
-      if (gameState.ropeSteps < 0) {
-        document.getElementById('winnerMascotContainer').innerHTML = getCrownedMascotSVG('red');
-        headline.textContent = `${gameConfig.redName} Menang!`;
-        headline.className = 'text-2xl sm:text-4xl font-black tracking-tight text-[#FF4B4B]';
-        document.getElementById('victorySubtext').textContent =
-          `Unggul ${Math.abs(gameState.ropeSteps).toFixed(1).replace('.0', '')} langkah saat peluit akhir berbunyi!`;
-      } else if (gameState.ropeSteps > 0) {
-        document.getElementById('winnerMascotContainer').innerHTML = getCrownedMascotSVG('blue');
-        headline.textContent = `${gameConfig.blueName} Menang!`;
-        headline.className = 'text-2xl sm:text-4xl font-black tracking-tight text-[#1CB0F6]';
-        document.getElementById('victorySubtext').textContent =
-          `Unggul ${Math.abs(gameState.ropeSteps).toFixed(1).replace('.0', '')} langkah saat peluit akhir berbunyi!`;
+      const steps = gameState.ropeSteps;
+      if (Math.abs(steps) < 0.01) {
+        showVictoryModal({
+          winner: 'draw',
+          headline: 'Pertandingan Seri!',
+          subtext: 'Waktu habis dengan posisi bendera tepat di tengah garis!'
+        });
+      } else if (steps < 0) {
+        showVictoryModal({
+          winner: 'red',
+          headline: `${gameConfig.redName} Menang!`,
+          subtext: 'Waktu habis — posisi tali lebih unggul di wilayah Tim Merah!'
+        });
       } else {
-        document.getElementById('winnerMascotContainer').innerHTML = getCrownedMascotSVG('draw');
-        headline.textContent = 'Hasil Pertandingan Seri!';
-        headline.className = 'text-2xl sm:text-4xl font-black tracking-tight text-[#E5A400]';
-        document.getElementById('victorySubtext').textContent =
-          'Kedua tim sama kuat! Posisi tali tepat di garis tengah.';
+        showVictoryModal({
+          winner: 'blue',
+          headline: `${gameConfig.blueName} Menang!`,
+          subtext: 'Waktu habis — posisi tali lebih unggul di wilayah Tim Biru!'
+        });
       }
-
-      openVictoryModal();
     }
 
-    function openVictoryModal() {
-      DuoAudio.victory();
-      launchConfetti();
-
+    function showVictoryModal({ winner, headline, subtext }) {
       const r = gameState.players.red;
       const b = gameState.players.blue;
-      const fmtPull = n => (Number.isInteger(n) ? `${n} langkah` : `${n.toFixed(1)} langkah`);
-
-      document.getElementById('statColRed').textContent = gameConfig.redName;
-      document.getElementById('statColBlue').textContent = gameConfig.blueName;
-
-      document.getElementById('statPullRed').textContent = fmtPull(r.pulls);
-      document.getElementById('statPullBlue').textContent = fmtPull(b.pulls);
-
-      document.getElementById('statBenarRed').textContent = r.correct;
-      document.getElementById('statBenarBlue').textContent = b.correct;
 
       const rTotal = r.correct + r.wrong;
       const bTotal = b.correct + b.wrong;
       const rAcc = rTotal > 0 ? Math.round((r.correct / rTotal) * 100) : 0;
       const bAcc = bTotal > 0 ? Math.round((b.correct / bTotal) * 100) : 0;
 
+      const rAvg = r.correct > 0 ? `${(r.totalTimeMs / r.correct / 1000).toFixed(1)} dtk/soal` : '- dtk/soal';
+      const bAvg = b.correct > 0 ? `${(b.totalTimeMs / b.correct / 1000).toFixed(1)} dtk/soal` : '- dtk/soal';
+
+      document.getElementById('victoryHeadline').textContent = headline;
+      document.getElementById('victorySubtext').textContent = subtext;
+      document.getElementById('statColRed').textContent = gameConfig.redName;
+      document.getElementById('statColBlue').textContent = gameConfig.blueName;
+
+      const fmtPull = v => (Number.isInteger(v) ? v : v.toFixed(1));
+      document.getElementById('statPullRed').textContent = fmtPull(r.pulls);
+      document.getElementById('statPullBlue').textContent = fmtPull(b.pulls);
+      document.getElementById('statBenarRed').textContent = `${r.correct} / ${rTotal}`;
+      document.getElementById('statBenarBlue').textContent = `${b.correct} / ${bTotal}`;
       document.getElementById('statAkurasiRed').textContent = `${rAcc}%`;
       document.getElementById('statAkurasiBlue').textContent = `${bAcc}%`;
-
-      document.getElementById('statSpeedRed').textContent =
-        r.correct > 0 ? `${(r.totalTimeMs / 1000 / r.correct).toFixed(1)} dtk/soal` : '- dtk/soal';
-      document.getElementById('statSpeedBlue').textContent =
-        b.correct > 0 ? `${(b.totalTimeMs / 1000 / b.correct).toFixed(1)} dtk/soal` : '- dtk/soal';
-
+      document.getElementById('statSpeedRed').textContent = rAvg;
+      document.getElementById('statSpeedBlue').textContent = bAvg;
       document.getElementById('statStreakRed').textContent = `${r.maxStreak}x`;
       document.getElementById('statStreakBlue').textContent = `${b.maxStreak}x`;
 
+      const mascotMount = document.getElementById('winnerMascotContainer');
+      mascotMount.innerHTML = getMascotVictorySvg(winner);
+
       document.getElementById('victoryModal').classList.remove('hidden');
+      startConfetti();
+    }
+
+    function getMascotVictorySvg(winner) {
+      if (winner === 'red') {
+        return `
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <polygon points="32,20 38,6 50,16 62,6 68,20" fill="#FFC800" stroke="#997300" stroke-width="3" stroke-linejoin="round"/>
+            <polygon points="22,42 16,18 40,28" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5" stroke-linejoin="round"/>
+            <polygon points="78,42 84,18 60,28" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5" stroke-linejoin="round"/>
+            <ellipse cx="50" cy="58" rx="30" ry="26" fill="#FF4B4B" stroke="#7F1D1D" stroke-width="3.5"/>
+            <path d="M21 58 C29 58, 38 66, 50 83 C31 83, 21 72, 21 58 Z" fill="#FFFFFF"/>
+            <path d="M79 58 C71 58, 62 66, 50 83 C69 83, 79 72, 79 58 Z" fill="#FFFFFF"/>
+            <path d="M33 52 Q39 45 45 52" fill="none" stroke="#2B2B2B" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M55 52 Q61 45 67 52" fill="none" stroke="#2B2B2B" stroke-width="3.5" stroke-linecap="round"/>
+            <ellipse cx="50" cy="65" rx="5" ry="3.5" fill="#2B2B2B"/>
+            <path d="M40 72 Q50 82 60 72 Z" fill="#EA2B2B" stroke="#2B2B2B" stroke-width="2.5"/>
+          </svg>
+        `;
+      } else if (winner === 'blue') {
+        return `
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <polygon points="32,20 38,6 50,16 62,6 68,20" fill="#FFC800" stroke="#997300" stroke-width="3" stroke-linejoin="round"/>
+            <circle cx="26" cy="30" r="12" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
+            <circle cx="74" cy="30" r="12" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
+            <ellipse cx="50" cy="58" rx="30" ry="26" fill="#1CB0F6" stroke="#0C4A6E" stroke-width="3.5"/>
+            <ellipse cx="50" cy="66" rx="16" ry="12" fill="#E0F2FE"/>
+            <path d="M33 52 Q39 45 45 52" fill="none" stroke="#2B2B2B" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M55 52 Q61 45 67 52" fill="none" stroke="#2B2B2B" stroke-width="3.5" stroke-linecap="round"/>
+            <ellipse cx="50" cy="61" rx="5.5" ry="3.8" fill="#0C4A6E"/>
+            <path d="M40 69 Q50 79 60 69 Z" fill="#1899D6" stroke="#0C4A6E" stroke-width="2.5"/>
+          </svg>
+        `;
+      } else {
+        return `
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <circle cx="50" cy="54" r="34" fill="#FFC800" stroke="#997300" stroke-width="4"/>
+            <polygon points="50,30 56,44 71,46 60,56 63,71 50,64 37,71 40,56 29,46 44,44" fill="#FFFFFF" stroke="#997300" stroke-width="2.5" stroke-linejoin="round"/>
+          </svg>
+        `;
+      }
     }
 
     /**
      * =========================================================================
-     * 9. ARENA VISUAL MASKOT DUOLINGO (HIGH-DPI CANVAS + SPRING PHYSICS)
+     * 9. ARENA ANIMASI VEKTOR DUOLINGO (MASKOT FOXY VS BUBU + FISIKA PEGAS)
      * =========================================================================
      */
     const arenaCanvas = document.getElementById('arenaCanvas');
     const arenaCtx = arenaCanvas.getContext('2d');
-    let canvasW = 900;
-    let canvasH = 260;
+    let arenaW = 800;
+    let arenaH = 220;
 
     function resizeArenaCanvas() {
-      const box = arenaCanvas.parentElement;
-      if (!box) return;
-      const rect = box.getBoundingClientRect();
+      const box = arenaCanvas.parentElement.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvasW = rect.width;
-      canvasH = rect.height;
-      arenaCanvas.width = canvasW * dpr;
-      arenaCanvas.height = canvasH * dpr;
+      arenaW = Math.max(300, box.width);
+      arenaH = Math.max(160, box.height);
+      arenaCanvas.width = arenaW * dpr;
+      arenaCanvas.height = arenaH * dpr;
       arenaCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    window.addEventListener('resize', () => {
-      if (!document.getElementById('gameScreen').classList.contains('hidden')) {
-        resizeArenaCanvas();
-      }
-      resizeConfettiCanvas();
-    });
+    window.addEventListener('resize', resizeArenaCanvas);
 
-    function emitArenaBurst(side, isStreakBoost) {
-      const midX = canvasW / 2;
-      const maxSpan = canvasW * 0.25;
-      const flagX = midX + (gameState.springPos / gameConfig.targetSteps) * maxSpan;
-      const groundY = canvasH * 0.80;
-      const mascotX = side === 'red' ? flagX - Math.min(86, canvasW * 0.10) : flagX + Math.min(86, canvasW * 0.10);
+    function emitArenaBurst(side, isSuperStreak) {
+      const centerX = arenaW / 2;
+      const trackHalf = Math.min(arenaW * 0.27, 230);
+      const flagX = centerX + gameState.springPos * trackHalf;
+      const groundY = arenaH * 0.80;
 
-      const count = isStreakBoost ? 18 : 10;
+      const count = isSuperStreak ? 22 : 12;
+      const baseX = side === 'red' ? flagX - 55 : flagX + 55;
+
       for (let i = 0; i < count; i++) {
         gameState.particles.push({
-          x: mascotX + randRange(-24, 24),
-          y: groundY - randRange(4, 22),
-          vx: (side === 'red' ? 1 : -1) * (Math.random() * 3 + 0.8),
-          vy: -(Math.random() * 2.8 + 0.8),
-          size: isStreakBoost ? randRange(5, 8) : randRange(3, 6),
-          alpha: 1,
-          color: isStreakBoost ? '#FFC800' : (side === 'red' ? '#FF9696' : '#84D8FF')
+          x: baseX + randRange(-18, 18),
+          y: groundY - randRange(4, 24),
+          vx: (side === 'red' ? 1 : -1) * (1.2 + Math.random() * 3.8),
+          vy: -1.5 - Math.random() * 3.6,
+          r: isSuperStreak ? 4 + Math.random() * 5 : 3 + Math.random() * 4,
+          alpha: 1.0,
+          color: isSuperStreak
+            ? (i % 2 === 0 ? '#FFC800' : '#FF9600')
+            : (side === 'red' ? '#FF9696' : '#84D8FF')
         });
       }
 
       gameState.callouts.push({
-        x: mascotX,
-        y: groundY - canvasH * 0.44,
+        text: isSuperStreak ? 'SUPER TARIKAN! 🔥' : 'TARIK!',
+        x: flagX,
+        y: groundY - 68,
         vy: -1.1,
-        alpha: 1,
-        text: isStreakBoost ? '🔥 +1.5 STREAK!' : '+1 TARIK!',
-        color: isStreakBoost ? '#FF9600' : (side === 'red' ? '#FF4B4B' : '#1CB0F6')
+        alpha: 1.0,
+        color: isSuperStreak ? '#FF9600' : (side === 'red' ? '#FF4B4B' : '#1CB0F6')
       });
     }
 
-    function arenaRenderLoop(nowMs) {
-      requestAnimationFrame(arenaRenderLoop);
-      if (document.getElementById('gameScreen').classList.contains('hidden')) return;
+    let lastFrameTime = performance.now();
 
-      const t = nowMs * 0.001;
+    function arenaRenderLoop(now) {
+      const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+      lastFrameTime = now;
 
-      // Fisika Pegas (Spring-Damper Physics)
-      const stiffness = 0.15;
-      const damping = 0.72;
-      const accel = (gameState.ropeSteps - gameState.springPos) * stiffness;
-      gameState.springVel = (gameState.springVel + accel) * damping;
-      gameState.springPos += gameState.springVel;
+      const targetNorm = Math.max(-1, Math.min(1, gameState.ropeSteps / gameConfig.targetSteps));
+      const stiffness = 135;
+      const damping = 14;
+      const force = (targetNorm - gameState.springPos) * stiffness;
+      gameState.springVel = (gameState.springVel + force * dt) * Math.exp(-damping * dt);
+      gameState.springPos += gameState.springVel * dt;
 
-      gameState.redPullAnim = Math.max(0, gameState.redPullAnim - 0.04);
-      gameState.bluePullAnim = Math.max(0, gameState.bluePullAnim - 0.04);
+      gameState.redPullAnim = Math.max(0, gameState.redPullAnim - dt * 2.8);
+      gameState.bluePullAnim = Math.max(0, gameState.bluePullAnim - dt * 2.8);
 
-      const w = canvasW;
-      const h = canvasH;
       const ctx = arenaCtx;
-      ctx.clearRect(0, 0, w, h);
+      ctx.clearRect(0, 0, arenaW, arenaH);
 
-      // 1. Langit Biru Cerah Duolingo
-      ctx.fillStyle = '#DDF4FF';
-      ctx.fillRect(0, 0, w, h);
+      const groundY = arenaH * 0.80;
+      const centerX = arenaW / 2;
+      const trackHalf = Math.min(arenaW * 0.27, 230);
+      const flagX = centerX + gameState.springPos * trackHalf;
 
-      drawDuoCloud(ctx, ((t * 11) % (w + 220)) - 110, h * 0.24, 0.88);
-      drawDuoCloud(ctx, ((t * 7 + w * 0.52) % (w + 220)) - 110, h * 0.16, 0.66);
+      drawSceneBackground(ctx, now, groundY);
+      drawArenaGround(ctx, groundY, centerX, trackHalf);
 
-      // 2. Perbukitan Hijau Berlapis
-      ctx.fillStyle = '#A5ED6E';
-      ctx.beginPath();
-      ctx.moveTo(0, h * 0.80);
-      ctx.quadraticCurveTo(w * 0.22, h * 0.50, w * 0.48, h * 0.80);
-      ctx.quadraticCurveTo(w * 0.76, h * 0.52, w, h * 0.80);
-      ctx.closePath();
-      ctx.fill();
+      const ropeY = groundY - 30;
+      const leftAnchorX = flagX - Math.min(155, arenaW * 0.22);
+      const rightAnchorX = flagX + Math.min(155, arenaW * 0.22);
 
-      ctx.fillStyle = '#78C800';
-      ctx.beginPath();
-      ctx.moveTo(0, h * 0.80);
-      ctx.quadraticCurveTo(w * 0.36, h * 0.62, w * 0.66, h * 0.80);
-      ctx.quadraticCurveTo(w * 0.85, h * 0.64, w, h * 0.80);
-      ctx.closePath();
-      ctx.fill();
-
-      // 3. Lintasan Rumput Rapi
-      const groundY = h * 0.80;
-      ctx.fillStyle = '#58CC02';
-      ctx.fillRect(0, groundY, w, h - groundY);
-
-      ctx.fillStyle = '#78C800';
-      ctx.fillRect(0, groundY, w, 5);
-
-      // 4. Garis Tengah & Garis Batas Menang
-      const midX = w / 2;
-      const maxSpan = w * 0.25;
-      const redWinX = midX - maxSpan;
-      const blueWinX = midX + maxSpan;
-
-      for (let step = -gameConfig.targetSteps; step <= gameConfig.targetSteps; step++) {
-        const sx = midX + (step / gameConfig.targetSteps) * maxSpan;
-        ctx.fillStyle = step === 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.55)';
-        ctx.beginPath();
-        ctx.arc(sx, groundY + (h - groundY) * 0.45, step === 0 ? 4.5 : 2.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      drawTrackMarker(ctx, midX, groundY, '#FFFFFF', 'TENGAH', false);
-      drawTrackMarker(ctx, redWinX, groundY, '#FF4B4B', 'MENANG', true);
-      drawTrackMarker(ctx, blueWinX, groundY, '#1CB0F6', 'MENANG', true);
-
-      // 5. Posisi Tali & Maskot
-      const clampedSpring = Math.max(-gameConfig.targetSteps, Math.min(gameConfig.targetSteps, gameState.springPos));
-      const flagX = midX + (clampedSpring / gameConfig.targetSteps) * maxSpan;
-      const ropeY = groundY - h * 0.22;
-
-      const mascotOffset = Math.min(84, w * 0.095);
-      const foxX = flagX - mascotOffset;
-      const bearX = flagX + mascotOffset;
-
-      drawBraidedRope(ctx, foxX - 24, bearX + 24, ropeY, t);
-      drawGoldCenterFlag(ctx, flagX, ropeY, gameState.springVel);
-
-      const dangerRatio = gameState.ropeSteps / gameConfig.targetSteps;
-      let foxMood = 'neutral';
-      if (gameState.redPullAnim > 0.2 || dangerRatio <= -0.35) foxMood = 'pulling';
-      if (dangerRatio >= 0.55) foxMood = 'panicked';
-
-      let bearMood = 'neutral';
-      if (gameState.bluePullAnim > 0.2 || dangerRatio >= 0.35) bearMood = 'pulling';
-      if (dangerRatio <= -0.55) bearMood = 'panicked';
-
-      const foxLean = -0.18 - gameState.redPullAnim * 0.24 + (gameState.springVel > 0.02 ? 0.14 : 0);
-      const bearLean = 0.18 + gameState.bluePullAnim * 0.24 - (gameState.springVel < -0.02 ? 0.14 : 0);
-
-      const foxOnFire = gameState.players.red.streak >= 3;
-      const bearOnFire = gameState.players.blue.streak >= 3;
-
-      drawFoxMascot(ctx, foxX, groundY, ropeY, foxLean, foxMood, foxOnFire, t);
-      drawBearMascot(ctx, bearX, groundY, ropeY, bearLean, bearMood, bearOnFire, t);
-
-      renderParticles(ctx);
-      renderCallouts(ctx);
-    }
-
-    function drawDuoCloud(ctx, x, y, scale) {
+      // Tali tambang dengan warna hangat & tekstur pilinan
       ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(scale, scale);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.arc(0, 0, 20, 0, Math.PI * 2);
-      ctx.arc(20, -7, 25, 0, Math.PI * 2);
-      ctx.arc(44, -2, 21, 0, Math.PI * 2);
-      ctx.arc(62, 5, 14, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawTrackMarker(ctx, x, groundY, color, text, hasFlag) {
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = hasFlag ? 3 : 2.5;
-      ctx.setLineDash(hasFlag ? [6, 4] : []);
-      ctx.beginPath();
-      ctx.moveTo(x, groundY - 54);
-      ctx.lineTo(x, groundY + 18);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      if (hasFlag) {
-        const dir = x < canvasW / 2 ? -1 : 1;
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.roundRect(x, groundY - 54, 38 * dir, 16, 4);
-        ctx.fill();
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = '900 9px "Nunito", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(text, x + 19 * dir, groundY - 43);
-      }
-      ctx.restore();
-    }
-
-    function drawBraidedRope(ctx, x1, x2, y, t) {
-      const jitter = Math.sin(t * 32) * Math.min(2.2, Math.abs(gameState.springVel) * 7);
-      ctx.save();
-
-      ctx.strokeStyle = '#92400E';
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#9A6B26';
       ctx.lineWidth = 11;
-      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(x1, y);
-      ctx.lineTo(x2, y + jitter);
+      ctx.moveTo(leftAnchorX - 18, ropeY);
+      ctx.lineTo(rightAnchorX + 18, ropeY);
       ctx.stroke();
 
-      ctx.strokeStyle = '#F59E0B';
-      ctx.lineWidth = 6.5;
+      ctx.strokeStyle = '#F3C66F';
+      ctx.lineWidth = 6;
+      ctx.setLineDash([10, 7]);
+      ctx.lineDashOffset = -flagX * 0.6;
       ctx.beginPath();
-      ctx.moveTo(x1, y);
-      ctx.lineTo(x2, y + jitter);
+      ctx.moveTo(leftAnchorX - 16, ropeY);
+      ctx.lineTo(rightAnchorX + 16, ropeY);
       ctx.stroke();
-
-      ctx.strokeStyle = '#B45309';
-      ctx.lineWidth = 2.2;
-      for (let rx = x1 + 8; rx < x2 - 8; rx += 11) {
-        ctx.beginPath();
-        ctx.moveTo(rx, y - 3.5);
-        ctx.lineTo(rx + 6, y + 3.5);
-        ctx.stroke();
-      }
       ctx.restore();
-    }
 
-    function drawGoldCenterFlag(ctx, x, y, velocity) {
+      const redAdvantage = -gameState.springPos;
+      const blueAdvantage = gameState.springPos;
+
+      drawFoxyMascot(ctx, leftAnchorX, groundY, ropeY, {
+        pullBoost: gameState.redPullAnim,
+        mood: redAdvantage > 0.28 ? 'winning' : redAdvantage < -0.35 ? 'panic' : 'focus',
+        time: now
+      });
+
+      drawBubuMascot(ctx, rightAnchorX, groundY, ropeY, {
+        pullBoost: gameState.bluePullAnim,
+        mood: blueAdvantage > 0.28 ? 'winning' : blueAdvantage < -0.35 ? 'panic' : 'focus',
+        time: now
+      });
+
+      // Bendera penanda tengah tali
       ctx.save();
-      const sway = Math.max(-16, Math.min(16, -velocity * 38));
+      ctx.strokeStyle = '#3C3C3C';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(flagX, ropeY - 12);
+      ctx.lineTo(flagX, ropeY + 34);
+      ctx.stroke();
 
+      const wave = Math.sin(now / 130) * 3;
       ctx.fillStyle = '#FFC800';
-      ctx.strokeStyle = '#E5A400';
-      ctx.lineWidth = 2.5;
-      ctx.lineJoin = 'round';
-
-      ctx.beginPath();
-      ctx.moveTo(x - 6, y + 4);
-      ctx.lineTo(x + 6, y + 4);
-      ctx.lineTo(x + 9 + sway, y + 30);
-      ctx.lineTo(x + sway, y + 23);
-      ctx.lineTo(x - 9 + sway, y + 30);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(x, y, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function drawFoxMascot(ctx, x, groundY, ropeY, lean, mood, onFire, t) {
-      ctx.save();
-      const scale = Math.min(1.06, Math.max(0.72, canvasH / 245));
-      const bounce = Math.sin(t * 7.5) * (mood === 'pulling' ? 2.5 : 1.3);
-
-      ctx.translate(x, groundY);
-      ctx.scale(scale, scale);
-
-      // Aura Api Streak 3x+
-      if (onFire) {
-        const pulse = 36 + Math.sin(t * 14) * 4;
-        ctx.fillStyle = 'rgba(255, 150, 0, 0.25)';
-        ctx.beginPath();
-        ctx.arc(0, -40, pulse, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
-      ctx.beginPath();
-      ctx.ellipse(0, 3, 25, 6, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Ekor Rubah
-      ctx.save();
-      const tailWag = Math.sin(t * 9) * 0.15;
-      ctx.translate(-14, -18 + bounce);
-      ctx.rotate(-0.45 + tailWag);
-      ctx.fillStyle = '#FF4B4B';
-      ctx.strokeStyle = '#7F1D1D';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.ellipse(-16, 0, 18, 10, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.arc(-28, 0, 7.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Kaki
-      ctx.strokeStyle = '#7F1D1D';
-      ctx.lineWidth = 7;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(-6, -20 + bounce);
-      ctx.lineTo(-15, -3);
-      ctx.moveTo(6, -20 + bounce);
-      ctx.lineTo(16, -3);
-      ctx.stroke();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.strokeStyle = '#7F1D1D';
+      ctx.strokeStyle = '#997300';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.ellipse(-15, -2, 8, 4.5, 0, 0, Math.PI * 2);
-      ctx.ellipse(16, -2, 8, 4.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      // Badan & Kepala
-      ctx.save();
-      ctx.translate(0, -22 + bounce);
-      ctx.rotate(lean);
-
-      ctx.fillStyle = '#FF4B4B';
-      ctx.strokeStyle = '#7F1D1D';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.roundRect(-15, -26, 30, 27, 11);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.translate(2, -44);
-
-      ctx.fillStyle = '#FF4B4B';
-      ctx.beginPath();
-      ctx.moveTo(-20, -10);
-      ctx.lineTo(-24, -32);
-      ctx.lineTo(-5, -20);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(18, -10);
-      ctx.lineTo(22, -32);
-      ctx.lineTo(3, -20);
+      ctx.moveTo(flagX, ropeY + 6);
+      ctx.lineTo(flagX + 24, ropeY + 14 + wave);
+      ctx.lineTo(flagX, ropeY + 24);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = '#FF4B4B';
       ctx.beginPath();
-      ctx.ellipse(0, 0, 24, 20, 0, 0, Math.PI * 2);
+      ctx.arc(flagX, ropeY, 7, 0, Math.PI * 2);
       ctx.fill();
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 2;
       ctx.stroke();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.ellipse(9, 7, 13, 10, -0.2, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (mood === 'pulling') {
-        ctx.strokeStyle = '#2B2B2B';
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(4, -5);
-        ctx.lineTo(11, -2);
-        ctx.lineTo(4, 1);
-        ctx.stroke();
-
-        ctx.fillStyle = '#7F1D1D';
-        ctx.beginPath();
-        ctx.arc(12, 9, 5.5, 0, Math.PI);
-        ctx.fill();
-      } else if (mood === 'panicked') {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(9, -3, 6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#2B2B2B';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        ctx.fillStyle = '#2B2B2B';
-        ctx.beginPath();
-        ctx.arc(10, -3, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#1CB0F6';
-        ctx.beginPath();
-        ctx.arc(-14, -4, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#2B2B2B';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(6, 10);
-        ctx.quadraticCurveTo(10, 7, 14, 10);
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = '#2B2B2B';
-        ctx.beginPath();
-        ctx.arc(9, -3, 4.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(10.5, -4.5, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#7F1D1D';
-        ctx.lineWidth = 2.8;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(4, -9);
-        ctx.lineTo(14, -7);
-        ctx.stroke();
-
-        ctx.strokeStyle = '#2B2B2B';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(10, 7, 4.5, 0.1 * Math.PI, 0.85 * Math.PI);
-        ctx.stroke();
-      }
-
-      ctx.fillStyle = '#2B2B2B';
-      ctx.beginPath();
-      ctx.ellipse(21, 3, 4, 3, 0, 0, Math.PI * 2);
-      ctx.fill();
-
       ctx.restore();
 
-      const handY = (ropeY - groundY) / scale;
-      ctx.strokeStyle = '#FF4B4B';
-      ctx.lineWidth = 7.5;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(Math.sin(lean) * 16, -38 + bounce);
-      ctx.lineTo(18, handY);
-      ctx.stroke();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.strokeStyle = '#7F1D1D';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.arc(18, handY, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    function drawBearMascot(ctx, x, groundY, ropeY, lean, mood, onFire, t) {
-      ctx.save();
-      const scale = Math.min(1.06, Math.max(0.72, canvasH / 245));
-      const bounce = Math.sin(t * 7.5 + 1.5) * (mood === 'pulling' ? 2.5 : 1.3);
-
-      ctx.translate(x, groundY);
-      ctx.scale(scale, scale);
-
-      if (onFire) {
-        const pulse = 36 + Math.sin(t * 14) * 4;
-        ctx.fillStyle = 'rgba(255, 150, 0, 0.25)';
-        ctx.beginPath();
-        ctx.arc(0, -40, pulse, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
-      ctx.beginPath();
-      ctx.ellipse(0, 3, 26, 6, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = '#0C4A6E';
-      ctx.lineWidth = 7.5;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(-6, -20 + bounce);
-      ctx.lineTo(-16, -3);
-      ctx.moveTo(6, -20 + bounce);
-      ctx.lineTo(15, -3);
-      ctx.stroke();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.strokeStyle = '#0C4A6E';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.ellipse(-16, -2, 8, 4.5, 0, 0, Math.PI * 2);
-      ctx.ellipse(15, -2, 8, 4.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.save();
-      ctx.translate(0, -22 + bounce);
-      ctx.rotate(lean);
-
-      ctx.fillStyle = '#1CB0F6';
-      ctx.strokeStyle = '#0C4A6E';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.roundRect(-16, -27, 32, 28, 12);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.translate(-2, -45);
-
-      ctx.fillStyle = '#1CB0F6';
-      ctx.beginPath();
-      ctx.arc(-18, -16, 9, 0, Math.PI * 2);
-      ctx.arc(18, -16, 9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 25, 21, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#E0F2FE';
-      ctx.beginPath();
-      ctx.ellipse(-10, 6, 12, 9.5, 0.15, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (mood === 'pulling') {
-        ctx.strokeStyle = '#0C4A6E';
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(-4, -5);
-        ctx.lineTo(-11, -2);
-        ctx.lineTo(-4, 1);
-        ctx.stroke();
-
-        ctx.fillStyle = '#0C4A6E';
-        ctx.beginPath();
-        ctx.arc(-12, 9, 5.5, 0, Math.PI);
-        ctx.fill();
-      } else if (mood === 'panicked') {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(-9, -3, 6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#0C4A6E';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        ctx.fillStyle = '#0C4A6E';
-        ctx.beginPath();
-        ctx.arc(-10, -3, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#84D8FF';
-        ctx.beginPath();
-        ctx.arc(15, -4, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#0C4A6E';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(-6, 10);
-        ctx.quadraticCurveTo(-10, 7, -14, 10);
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = '#0C4A6E';
-        ctx.beginPath();
-        ctx.arc(-9, -3, 4.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(-10.5, -4.5, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#0C4A6E';
-        ctx.lineWidth = 2.8;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(-4, -9);
-        ctx.lineTo(-14, -7);
-        ctx.stroke();
-
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(-10, 7, 4.5, 0.15 * Math.PI, 0.9 * Math.PI);
-        ctx.stroke();
-      }
-
-      ctx.fillStyle = '#0C4A6E';
-      ctx.beginPath();
-      ctx.ellipse(-20, 3, 4.2, 3, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
-
-      const handY = (ropeY - groundY) / scale;
-      ctx.strokeStyle = '#1CB0F6';
-      ctx.lineWidth = 8;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(Math.sin(lean) * 16, -38 + bounce);
-      ctx.lineTo(-18, handY);
-      ctx.stroke();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.strokeStyle = '#0C4A6E';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.arc(-18, handY, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    function renderParticles(ctx) {
       for (let i = gameState.particles.length - 1; i >= 0; i--) {
         const pt = gameState.particles[i];
         pt.x += pt.vx;
         pt.y += pt.vy;
-        pt.alpha -= 0.028;
-
+        pt.vy += 0.16;
+        pt.alpha -= dt * 1.7;
         if (pt.alpha <= 0) {
           gameState.particles.splice(i, 1);
           continue;
         }
-
         ctx.save();
         ctx.globalAlpha = pt.alpha;
         ctx.fillStyle = pt.color;
         ctx.beginPath();
-        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+        ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
-    }
 
-    function renderCallouts(ctx) {
       for (let i = gameState.callouts.length - 1; i >= 0; i--) {
         const c = gameState.callouts[i];
         c.y += c.vy;
-        c.alpha -= 0.022;
-
+        c.alpha -= dt * 1.4;
         if (c.alpha <= 0) {
           gameState.callouts.splice(i, 1);
           continue;
         }
-
         ctx.save();
         ctx.globalAlpha = c.alpha;
-        ctx.font = '900 16px "Nunito", sans-serif';
+        ctx.font = '900 16px Nunito, sans-serif';
         ctx.textAlign = 'center';
-        ctx.lineWidth = 4;
         ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 4;
         ctx.strokeText(c.text, c.x, c.y);
         ctx.fillStyle = c.color;
         ctx.fillText(c.text, c.x, c.y);
         ctx.restore();
       }
+
+      requestAnimationFrame(arenaRenderLoop);
+    }
+
+    function drawSceneBackground(ctx, now, groundY) {
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+      skyGrad.addColorStop(0, '#BCE8FF');
+      skyGrad.addColorStop(1, '#EBF8FF');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, arenaW, groundY);
+
+      ctx.fillStyle = '#FFE066';
+      ctx.beginPath();
+      ctx.arc(arenaW * 0.87, arenaH * 0.22, 22, 0, Math.PI * 2);
+      ctx.fill();
+
+      const drawCloud = (cx, cy, s) => {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 16 * s, 0, Math.PI * 2);
+        ctx.arc(cx + 15 * s, cy - 5 * s, 20 * s, 0, Math.PI * 2);
+        ctx.arc(cx + 32 * s, cy, 15 * s, 0, Math.PI * 2);
+        ctx.fill();
+      };
+      const drift = (now * 0.012) % (arenaW + 160);
+      drawCloud(((arenaW * 0.2 + drift) % (arenaW + 120)) - 60, arenaH * 0.24, 0.95);
+      drawCloud(((arenaW * 0.62 + drift * 0.7) % (arenaW + 120)) - 60, arenaH * 0.17, 0.75);
+
+      ctx.fillStyle = '#B8F28A';
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.quadraticCurveTo(arenaW * 0.24, groundY - 46, arenaW * 0.52, groundY);
+      ctx.quadraticCurveTo(arenaW * 0.78, groundY - 38, arenaW, groundY);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawArenaGround(ctx, groundY, centerX, trackHalf) {
+      ctx.fillStyle = '#58CC02';
+      ctx.fillRect(0, groundY, arenaW, arenaH - groundY);
+
+      ctx.fillStyle = '#58A700';
+      ctx.fillRect(0, groundY, arenaW, 6);
+
+      const leftLineX = centerX - trackHalf;
+      const rightLineX = centerX + trackHalf;
+
+      ctx.fillStyle = '#FF4B4B';
+      ctx.fillRect(leftLineX - 3, groundY - 4, 6, arenaH - groundY + 4);
+      ctx.beginPath();
+      ctx.moveTo(leftLineX, groundY - 4);
+      ctx.lineTo(leftLineX, groundY - 26);
+      ctx.lineTo(leftLineX - 16, groundY - 19);
+      ctx.lineTo(leftLineX, groundY - 12);
+      ctx.fill();
+
+      ctx.fillStyle = '#1CB0F6';
+      ctx.fillRect(rightLineX - 3, groundY - 4, 6, arenaH - groundY + 4);
+      ctx.beginPath();
+      ctx.moveTo(rightLineX, groundY - 4);
+      ctx.lineTo(rightLineX, groundY - 26);
+      ctx.lineTo(rightLineX + 16, groundY - 19);
+      ctx.lineTo(rightLineX, groundY - 12);
+      ctx.fill();
+
+      ctx.save();
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(centerX, groundY);
+      ctx.lineTo(centerX, arenaH);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawFoxyMascot(ctx, x, groundY, ropeY, { pullBoost, mood, time }) {
+      const leanAngle = -0.24 - pullBoost * 0.20 + Math.sin(time / 140) * 0.025;
+      const hopY = -pullBoost * 5;
+
+      ctx.save();
+      ctx.translate(x, groundY + hopY);
+
+      ctx.fillStyle = 'rgba(0,0,0,0.14)';
+      ctx.beginPath();
+      ctx.ellipse(0, 2 - hopY, 24, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#7F1D1D';
+      ctx.beginPath();
+      ctx.roundRect(-16, -12, 12, 12, 5);
+      ctx.roundRect(6, -10, 12, 10, 5);
+      ctx.fill();
+
+      ctx.rotate(leanAngle);
+
+      ctx.fillStyle = '#FF4B4B';
+      ctx.strokeStyle = '#7F1D1D';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-12, -22);
+      ctx.quadraticCurveTo(-36, -34, -32, -16);
+      ctx.quadraticCurveTo(-24, -10, -12, -16);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#FF4B4B';
+      ctx.beginPath();
+      ctx.roundRect(-15, -42, 30, 30, 13);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.ellipse(2, -26, 8, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.translate(0, -54);
+      ctx.beginPath();
+      ctx.moveTo(-13, -8);
+      ctx.lineTo(-16, -24);
+      ctx.lineTo(-3, -14);
+      ctx.closePath();
+      ctx.fillStyle = '#FF4B4B';
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(13, -8);
+      ctx.lineTo(16, -24);
+      ctx.lineTo(3, -14);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 18, 15, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#FF4B4B';
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.ellipse(5, 4, 11, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#2B2B2B';
+      if (mood === 'panic') {
+        ctx.beginPath();
+        ctx.arc(5, -2, 3.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#38BDF8';
+        ctx.beginPath();
+        ctx.arc(-11, -6, 3, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(5, -2, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#7F1D1D';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(0, -8);
+        ctx.lineTo(10, -5);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#2B2B2B';
+      ctx.beginPath();
+      ctx.arc(14, 2, 2.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.strokeStyle = '#7F1D1D';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(14, -28, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawBubuMascot(ctx, x, groundY, ropeY, { pullBoost, mood, time }) {
+      const leanAngle = 0.24 + pullBoost * 0.20 - Math.sin(time / 140) * 0.025;
+      const hopY = -pullBoost * 5;
+
+      ctx.save();
+      ctx.translate(x, groundY + hopY);
+
+      ctx.fillStyle = 'rgba(0,0,0,0.14)';
+      ctx.beginPath();
+      ctx.ellipse(0, 2 - hopY, 25, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0C4A6E';
+      ctx.beginPath();
+      ctx.roundRect(4, -12, 12, 12, 5);
+      ctx.roundRect(-18, -10, 12, 10, 5);
+      ctx.fill();
+
+      ctx.rotate(leanAngle);
+
+      ctx.fillStyle = '#1CB0F6';
+      ctx.strokeStyle = '#0C4A6E';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(-16, -43, 32, 31, 14);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#E0F2FE';
+      ctx.beginPath();
+      ctx.ellipse(-2, -26, 9, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.translate(0, -55);
+      ctx.fillStyle = '#1CB0F6';
+      ctx.beginPath();
+      ctx.arc(-13, -12, 7, 0, Math.PI * 2);
+      ctx.arc(13, -12, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 19, 16, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#E0F2FE';
+      ctx.beginPath();
+      ctx.ellipse(-6, 4, 9, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#2B2B2B';
+      if (mood === 'panic') {
+        ctx.beginPath();
+        ctx.arc(-6, -2, 3.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#38BDF8';
+        ctx.beginPath();
+        ctx.arc(12, -6, 3, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(-6, -2, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#0C4A6E';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(0, -8);
+        ctx.lineTo(-10, -5);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#0C4A6E';
+      ctx.beginPath();
+      ctx.arc(-13, 2, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.strokeStyle = '#0C4A6E';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(-14, -28, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
     }
 
     /**
      * =========================================================================
-     * 10. KONFETI PERAYAAN DUOLINGO
+     * 10. ANIMASI KONFETI DUOLINGO PADA LAYAR KEMENANGAN
      * =========================================================================
      */
     const confettiCanvas = document.getElementById('confettiCanvas');
     const confettiCtx = confettiCanvas.getContext('2d');
-    let confettiItems = [];
-    let confettiRunning = false;
+    let confettiPieces = [];
+    let confettiAnimId = null;
 
-    function resizeConfettiCanvas() {
-      confettiCanvas.width = window.innerWidth;
-      confettiCanvas.height = window.innerHeight;
-    }
+    function startConfetti() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      confettiCanvas.width = window.innerWidth * dpr;
+      confettiCanvas.height = window.innerHeight * dpr;
+      confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    function launchConfetti() {
-      resizeConfettiCanvas();
-      confettiRunning = true;
-      confettiItems = [];
-      const duoColors = ['#58CC02', '#1CB0F6', '#FF4B4B', '#FFC800', '#FF9600', '#CE82FF'];
+      const colors = ['#58CC02', '#1CB0F6', '#FFC800', '#FF4B4B', '#CE82FF', '#FF9600'];
+      confettiPieces = Array.from({ length: 85 }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: -20 - Math.random() * window.innerHeight * 0.5,
+        w: 7 + Math.random() * 7,
+        h: 5 + Math.random() * 5,
+        vx: -2 + Math.random() * 4,
+        vy: 2.2 + Math.random() * 3.5,
+        rot: Math.random() * Math.PI * 2,
+        vRot: -0.1 + Math.random() * 0.2,
+        color: colors[randRange(0, colors.length - 1)]
+      }));
 
-      for (let i = 0; i < 100; i++) {
-        confettiItems.push({
-          x: Math.random() * confettiCanvas.width,
-          y: Math.random() * -confettiCanvas.height,
-          w: randRange(7, 13),
-          h: randRange(5, 9),
-          color: duoColors[i % duoColors.length],
-          vy: Math.random() * 3.5 + 2.2,
-          vx: (Math.random() - 0.5) * 2.4,
-          angle: Math.random() * Math.PI * 2,
-          spin: (Math.random() - 0.5) * 0.14
+      const renderConfetti = () => {
+        confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        confettiPieces.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vRot;
+          if (p.y > window.innerHeight + 20) {
+            p.y = -15;
+            p.x = Math.random() * window.innerWidth;
+          }
+          confettiCtx.save();
+          confettiCtx.translate(p.x, p.y);
+          confettiCtx.rotate(p.rot);
+          confettiCtx.fillStyle = p.color;
+          confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          confettiCtx.restore();
         });
-      }
-      requestAnimationFrame(confettiLoop);
+        confettiAnimId = requestAnimationFrame(renderConfetti);
+      };
+
+      stopConfetti();
+      confettiAnimId = requestAnimationFrame(renderConfetti);
     }
 
     function stopConfetti() {
-      confettiRunning = false;
-      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-    }
-
-    function confettiLoop() {
-      if (!confettiRunning) return;
-      requestAnimationFrame(confettiLoop);
-      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-
-      confettiItems.forEach(c => {
-        c.x += c.vx;
-        c.y += c.vy;
-        c.angle += c.spin;
-
-        if (c.y > confettiCanvas.height + 16) {
-          c.y = -12;
-          c.x = Math.random() * confettiCanvas.width;
-        }
-
-        confettiCtx.save();
-        confettiCtx.translate(c.x, c.y);
-        confettiCtx.rotate(c.angle);
-        confettiCtx.fillStyle = c.color;
-        confettiCtx.beginPath();
-        confettiCtx.roundRect(-c.w / 2, -c.h / 2, c.w, c.h, 2);
-        confettiCtx.fill();
-        confettiCtx.restore();
-      });
+      if (confettiAnimId) {
+        cancelAnimationFrame(confettiAnimId);
+        confettiAnimId = null;
+      }
+      confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     }
 
     /**
      * =========================================================================
-     * 11. MESIN PWA, DETEKSI PERANGKAT HP/LAPTOP & EKSPOR GITHUB PAGES
+     * 11. MODUL PWA & EKSPOR FILE GITHUB PAGES (IKON PNG, MANIFEST, SW.JS)
      * =========================================================================
      */
     const DuoPWA = (() => {
       let deferredPrompt = null;
-      let isStandalone = false;
-      let icon192DataUrl = '';
-      let icon512DataUrl = '';
+      let icon192Url = '';
+      let icon512Url = '';
 
-      function isMobileDevice() {
-        return (
-          /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
-          (navigator.maxTouchPoints > 1 && window.innerWidth < 1024)
-        );
-      }
-
-      /**
-       * Menggambar ikon aplikasi PNG resolusi tinggi di Canvas offscreen
-       */
-      function renderAppIconPNG(size) {
+      function renderAppIconDataUrl(size) {
         const c = document.createElement('canvas');
         c.width = size;
         c.height = size;
         const ctx = c.getContext('2d');
-        const s = size / 512;
+        const r = size * 0.22;
 
-        ctx.save();
-        ctx.scale(s, s);
-
-        // Squircle Duolingo Feather Green (#58CC02)
         ctx.fillStyle = '#58CC02';
         ctx.beginPath();
-        ctx.roundRect(16, 16, 480, 480, 108);
-        ctx.fill();
-
-        ctx.fillStyle = '#58A700';
-        ctx.beginPath();
-        ctx.roundRect(16, 420, 480, 76, [0, 0, 108, 108]);
+        ctx.roundRect(0, 0, size, size, r);
         ctx.fill();
 
         ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
         ctx.beginPath();
-        ctx.roundRect(36, 32, 440, 175, 84);
+        ctx.arc(size * 0.5, size * 0.46, size * 0.34, 0, Math.PI * 2);
         ctx.fill();
 
-        // Simbol Matematika (+ − × ÷)
-        const symbols = [
-          { ch: '+', x: 112, y: 122, rot: -0.22 },
-          { ch: '−', x: 206, y: 98, rot: -0.08 },
-          { ch: '×', x: 306, y: 98, rot: 0.08 },
-          { ch: '÷', x: 400, y: 122, rot: 0.22 }
-        ];
-        ctx.font = '900 54px "Nunito", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        symbols.forEach(item => {
-          ctx.save();
-          ctx.translate(item.x, item.y);
-          ctx.rotate(item.rot);
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.16)';
-          ctx.fillText(item.ch, 0, 5);
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillText(item.ch, 0, 0);
-          ctx.restore();
-        });
-
-        // Lingkaran Putih Arena
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(256, 282, 152, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.lineWidth = 10;
-        ctx.strokeStyle = '#D7FFB8';
-        ctx.stroke();
-
-        // Tali Tambang & Bendera Emas
-        ctx.strokeStyle = '#92400E';
-        ctx.lineWidth = 22;
+        ctx.strokeStyle = '#F3C66F';
+        ctx.lineWidth = size * 0.055;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(118, 336);
-        ctx.lineTo(394, 336);
+        ctx.moveTo(size * 0.18, size * 0.62);
+        ctx.lineTo(size * 0.82, size * 0.62);
         ctx.stroke();
 
-        ctx.strokeStyle = '#F59E0B';
-        ctx.lineWidth = 13;
+        ctx.fillStyle = '#FF4B4B';
         ctx.beginPath();
-        ctx.moveTo(118, 336);
-        ctx.lineTo(394, 336);
+        ctx.arc(size * 0.31, size * 0.43, size * 0.13, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.lineWidth = size * 0.02;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.stroke();
+
+        ctx.fillStyle = '#1CB0F6';
+        ctx.beginPath();
+        ctx.arc(size * 0.69, size * 0.43, size * 0.13, 0, Math.PI * 2);
+        ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = '#FFC800';
-        ctx.strokeStyle = '#E5A400';
-        ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.moveTo(244, 340);
-        ctx.lineTo(268, 340);
-        ctx.lineTo(274, 396);
-        ctx.lineTo(256, 382);
-        ctx.lineTo(238, 396);
+        ctx.moveTo(size * 0.50, size * 0.56);
+        ctx.lineTo(size * 0.50, size * 0.80);
+        ctx.lineTo(size * 0.64, size * 0.68);
         ctx.closePath();
         ctx.fill();
-        ctx.stroke();
-
-        // Foxy (Kiri)
-        ctx.save();
-        ctx.translate(166, 256);
-        ctx.fillStyle = '#FF4B4B';
-        ctx.strokeStyle = '#7F1D1D';
-        ctx.lineWidth = 7;
-        ctx.lineJoin = 'round';
-        ctx.beginPath();
-        ctx.moveTo(-42, -16);
-        ctx.lineTo(-50, -64);
-        ctx.lineTo(-10, -40);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(42, -16);
-        ctx.lineTo(50, -64);
-        ctx.lineTo(10, -40);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.ellipse(0, 4, 52, 44, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
 
         ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.ellipse(16, 16, 26, 20, -0.2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.font = `900 ${Math.round(size * 0.14)}px Nunito, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('1+2=3', size * 0.50, size * 0.24);
 
-        ctx.fillStyle = '#2B2B2B';
-        ctx.beginPath();
-        ctx.arc(14, -4, 7.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(16.5, -6.5, 2.8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#2B2B2B';
-        ctx.beginPath();
-        ctx.ellipse(42, 10, 8, 6, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        // Bubu (Kanan)
-        ctx.save();
-        ctx.translate(346, 256);
-        ctx.fillStyle = '#1CB0F6';
-        ctx.strokeStyle = '#0C4A6E';
-        ctx.lineWidth = 7;
-        ctx.beginPath();
-        ctx.arc(-36, -34, 19, 0, Math.PI * 2);
-        ctx.arc(36, -34, 19, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.ellipse(0, 4, 52, 44, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#E0F2FE';
-        ctx.beginPath();
-        ctx.ellipse(-18, 16, 24, 19, 0.15, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#0C4A6E';
-        ctx.beginPath();
-        ctx.arc(-14, -4, 7.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(-16.5, -6.5, 2.8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#0C4A6E';
-        ctx.beginPath();
-        ctx.ellipse(-40, 10, 8.5, 6, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.restore();
         return c.toDataURL('image/png');
       }
 
-      function buildManifestObject(forDownload = false) {
-        let startUrl = './index.html';
-        let scopeUrl = './';
-
-        if (!forDownload && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
-          startUrl = window.location.origin + window.location.pathname;
-          scopeUrl = new URL('./', window.location.href).href;
-        }
+      function buildManifestObject() {
+        const currentUrl = window.location.href.split('#')[0].split('?')[0];
+        const baseScope = currentUrl.endsWith('/')
+          ? currentUrl
+          : currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
 
         return {
-          name: 'Tarik Tambang Matematika',
+          name: 'Tarik Tambang Matematika — Game Edukasi 2 Siswa',
           short_name: 'Tarik Tambang',
-          description: 'Game edukasi tarik tambang matematika interaktif untuk 2 siswa',
-          start_url: startUrl,
-          scope: scopeUrl,
+          description: 'Game edukasi tarik tambang matematika interaktif untuk 2 siswa di kelas.',
+          start_url: currentUrl,
+          scope: baseScope,
           display: 'standalone',
           orientation: 'any',
-          background_color: '#FFFFFF',
+          background_color: '#F7F7F7',
           theme_color: '#58CC02',
           categories: ['education', 'games'],
           icons: [
-            { src: icon192DataUrl, sizes: '192x192', type: 'image/png', purpose: 'any' },
-            { src: icon192DataUrl, sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-            { src: icon512DataUrl, sizes: '512x512', type: 'image/png', purpose: 'any' },
-            { src: icon512DataUrl, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+            { src: icon192Url, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: icon512Url, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
           ]
         };
       }
 
-      function injectManifestAndIcons() {
-        icon192DataUrl = renderAppIconPNG(192);
-        icon512DataUrl = renderAppIconPNG(512);
+      function generateServiceWorkerSource() {
+        return `const CACHE_NAME = 'tarik-tambang-mtk-v1';
+const ASSETS = ['./', './index.html', './manifest.json'];
 
-        const favicon = document.getElementById('appFavicon');
-        const appleIcon = document.getElementById('appleTouchIcon');
-        const modalPreview = document.getElementById('modalAppIconPreview');
-        const manifestLink = document.getElementById('dynamicManifest');
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+  );
+});
 
-        if (favicon) favicon.href = icon192DataUrl;
-        if (appleIcon) appleIcon.href = icon192DataUrl;
-        if (modalPreview) modalPreview.src = icon192DataUrl;
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
 
-        try {
-          const manifestObj = buildManifestObject(false);
-          const blob = new Blob([JSON.stringify(manifestObj, null, 2)], {
-            type: 'application/manifest+json'
-          });
-          if (manifestLink) {
-            manifestLink.href = URL.createObjectURL(blob);
-          }
-        } catch (err) {
-          // Abaikan pada sandbox tanpa Blob URL
-        }
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(cached => cached || fetch(event.request))
+  );
+});
+`;
       }
 
-      async function registerOptionalServiceWorker() {
-        if (!('serviceWorker' in navigator)) return;
-        if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') return;
-
-        try {
-          const res = await fetch('./sw.js', { method: 'HEAD', cache: 'no-store' });
-          const contentType = res.headers.get('content-type') || '';
-          if (res.ok && contentType.includes('javascript')) {
-            await navigator.serviceWorker.register('./sw.js');
-          }
-        } catch (err) {
-          // Tidak masalah jika sw.js belum diunggah
-        }
+      function triggerFileDownload(filename, content, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
 
-      function switchInstallTab(tabKey) {
+      function selectInstallTab(tabKey) {
         document.querySelectorAll('.install-tab-btn').forEach(btn => {
           const active = btn.dataset.tab === tabKey;
           btn.className = active
@@ -3364,200 +3192,121 @@
         document.getElementById('tabContentGithub').classList.toggle('hidden', tabKey !== 'github');
       }
 
-      function updateInstallUI() {
-        const headerBtn = document.getElementById('btnInstallApp');
-        const headerLabel = document.getElementById('btnInstallAppLabel');
-        const directBanner = document.getElementById('directInstallBanner');
-        const statusBadge = document.getElementById('installStatusBadge');
-
-        isStandalone =
-          window.matchMedia('(display-mode: standalone)').matches ||
-          window.navigator.standalone === true;
-
-        if (isStandalone) {
-          headerBtn.className = 'duo-btn duo-btn-green h-10 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-extrabold text-xs sm:text-sm whitespace-nowrap shrink-0';
-          headerLabel.textContent = 'Terpasang ✓';
-          directBanner.classList.add('hidden');
-          statusBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#D7FFB8] text-[#58A700] font-extrabold text-[11px] uppercase tracking-wider mb-1';
-          statusBadge.textContent = '✓ Terpasang Sebagai Aplikasi';
-        } else if (deferredPrompt) {
-          headerBtn.className = 'duo-btn duo-btn-green h-10 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-extrabold text-xs sm:text-sm whitespace-nowrap shrink-0';
-          headerLabel.textContent = 'Instal App';
-          directBanner.classList.remove('hidden');
-          statusBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#D7FFB8] text-[#58A700] font-extrabold text-[11px] uppercase tracking-wider mb-1';
-          statusBadge.textContent = '● Siap Dipasang Langsung';
-        } else {
-          headerBtn.className = 'duo-btn duo-btn-blue h-10 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-extrabold text-xs sm:text-sm whitespace-nowrap shrink-0';
-          headerLabel.textContent = 'Instal App';
-          directBanner.classList.add('hidden');
-          statusBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#DDF4FF] text-[#1899D6] font-extrabold text-[11px] uppercase tracking-wider mb-1';
-          statusBadge.textContent = 'Aplikasi Web Progresif (PWA)';
+      async function promptNativeInstall() {
+        if (!deferredPrompt) return false;
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          deferredPrompt = null;
+          document.getElementById('directInstallBanner').classList.add('hidden');
+          document.getElementById('installModal').classList.add('hidden');
+          return true;
         }
+        return false;
       }
 
-      async function triggerNativePrompt() {
-        if (!deferredPrompt) {
-          openModal();
-          return;
+      function init() {
+        icon192Url = renderAppIconDataUrl(192);
+        icon512Url = renderAppIconDataUrl(512);
+
+        document.getElementById('appFavicon').href = icon192Url;
+        document.getElementById('appleTouchIcon').href = icon192Url;
+        document.getElementById('modalAppIconPreview').src = icon192Url;
+
+        const manifestObj = buildManifestObject();
+        const manifestBlob = new Blob([JSON.stringify(manifestObj, null, 2)], { type: 'application/manifest+json' });
+        document.getElementById('dynamicManifest').href = URL.createObjectURL(manifestBlob);
+
+        // Deteksi otomatis apakah pengguna membuka di HP/Tablet atau Laptop/PC
+        const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        selectInstallTab(isMobileDevice ? 'hp' : 'laptop');
+
+        // Registrasi Service Worker jika tersedia di server/GitHub Pages
+        if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
         }
-        try {
-          deferredPrompt.prompt();
-          const choice = await deferredPrompt.userChoice;
-          if (choice && choice.outcome === 'accepted') {
-            deferredPrompt = null;
-            closeModal();
-          }
-          updateInstallUI();
-        } catch (err) {
-          openModal();
-        }
-      }
 
-      function openModal() {
-        updateInstallUI();
-        // Otomatis sorot tab sesuai perangkat yang sedang digunakan (HP vs Laptop)
-        switchInstallTab(isMobileDevice() ? 'hp' : 'laptop');
-        document.getElementById('installModal').classList.remove('hidden');
-      }
-
-      function closeModal() {
-        document.getElementById('installModal').classList.add('hidden');
-      }
-
-      function downloadFile(filename, content, mimeType) {
-        const blob = new Blob([content], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }
-
-      function generateServiceWorkerSource() {
-        return `// Service Worker — Tarik Tambang Matematika (Mode Offline Kelas)
-const CACHE_NAME = 'tarik-tambang-mtk-v2';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
-  );
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      )
-    )
-  );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return (
-        cached ||
-        fetch(event.request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              const clone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-            }
-            return response;
-          })
-          .catch(() => caches.match('./index.html'))
-      );
-    })
-  );
-});
-`;
-      }
-
-      function bindUIEvents() {
+        // Tangkap event instalasi resmi Chrome/Edge
         window.addEventListener('beforeinstallprompt', e => {
           e.preventDefault();
           deferredPrompt = e;
-          updateInstallUI();
+
+          const navBtn = document.getElementById('btnInstallApp');
+          navBtn.className = 'duo-btn duo-btn-green h-10 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-extrabold text-xs sm:text-sm whitespace-nowrap shrink-0';
+          document.getElementById('btnInstallAppLabel').textContent = 'Instal App';
+          document.getElementById('directInstallBanner').classList.remove('hidden');
         });
 
         window.addEventListener('appinstalled', () => {
           deferredPrompt = null;
-          isStandalone = true;
-          updateInstallUI();
-          closeModal();
+          document.getElementById('directInstallBanner').classList.add('hidden');
+          const navBtn = document.getElementById('btnInstallApp');
+          navBtn.className = 'duo-btn duo-card-selected-green h-10 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-extrabold text-xs sm:text-sm whitespace-nowrap shrink-0';
+          document.getElementById('btnInstallAppLabel').textContent = 'Terpasang ✓';
         });
 
-        // Tombol Header 'Instal App'
+        // Tombol navbar "Instal App"
         document.getElementById('btnInstallApp').addEventListener('click', () => {
           DuoAudio.tap();
-          openModal();
+          document.getElementById('installModal').classList.remove('hidden');
         });
 
-        // Tombol 'Pasang Aplikasi Sekarang' di dalam Modal
         document.getElementById('btnModalInstallNow').addEventListener('click', () => {
           DuoAudio.tap();
-          triggerNativePrompt();
+          promptNativeInstall();
         });
 
-        // Tab switcher di Modal
-        document.querySelectorAll('.install-tab-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            DuoAudio.tap();
-            switchInstallTab(btn.dataset.tab);
-          });
-        });
-
-        // Tutup Modal
         document.getElementById('btnCloseInstallModal').addEventListener('click', () => {
           DuoAudio.tap();
-          closeModal();
+          document.getElementById('installModal').classList.add('hidden');
         });
 
         document.getElementById('installModal').addEventListener('click', e => {
           if (e.target.id === 'installModal') {
-            closeModal();
+            document.getElementById('installModal').classList.add('hidden');
           }
         });
 
-        // Unduh paket file GitHub Pages
+        document.querySelectorAll('.install-tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            DuoAudio.tap();
+            selectInstallTab(btn.dataset.tab);
+          });
+        });
+
+        // Unduh file siap GitHub Pages
         document.getElementById('btnDownloadHtml').addEventListener('click', () => {
           DuoAudio.tap();
           const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-          downloadFile('index.html', fullHtml, 'text/html;charset=utf-8');
+          triggerFileDownload('index.html', fullHtml, 'text/html;charset=utf-8');
         });
 
         document.getElementById('btnDownloadManifest').addEventListener('click', () => {
           DuoAudio.tap();
-          const manifestJson = JSON.stringify(buildManifestObject(true), null, 2);
-          downloadFile('manifest.json', manifestJson, 'application/manifest+json;charset=utf-8');
+          const staticManifest = {
+            name: 'Tarik Tambang Matematika — Game Edukasi 2 Siswa',
+            short_name: 'Tarik Tambang',
+            description: 'Game edukasi tarik tambang matematika interaktif untuk 2 siswa di kelas.',
+            start_url: './index.html',
+            scope: './',
+            display: 'standalone',
+            background_color: '#F7F7F7',
+            theme_color: '#58CC02',
+            icons: [
+              { src: icon192Url, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+              { src: icon512Url, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+            ]
+          };
+          triggerFileDownload('manifest.json', JSON.stringify(staticManifest, null, 2), 'application/manifest+json');
         });
 
         document.getElementById('btnDownloadSw').addEventListener('click', () => {
           DuoAudio.tap();
-          downloadFile('sw.js', generateServiceWorkerSource(), 'application/javascript;charset=utf-8');
+          triggerFileDownload('sw.js', generateServiceWorkerSource(), 'application/javascript;charset=utf-8');
         });
       }
 
-      return {
-        init() {
-          injectManifestAndIcons();
-          bindUIEvents();
-          updateInstallUI();
-          registerOptionalServiceWorker();
-        }
-      };
+      return { init };
     })();
 
     /**
@@ -3570,6 +3319,7 @@ self.addEventListener('fetch', (event) => {
       syncAudioButtonsUI();
       DuoAudio.setBgmMode('lobby');
       setupScreenEvents();
+      initMultiTouchEngine();
       resizeArenaCanvas();
       requestAnimationFrame(arenaRenderLoop);
     };
